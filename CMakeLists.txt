@@ -38,6 +38,8 @@ set(PROJECT_SOURCES
         view_model/kfilesystemmodel.h
         view_model/kmimesizesmodel.cpp
         view_model/kmimesizesmodel.h
+        view_model/kmapper.cpp
+        view_model/kmapper.h
         getinfo.ui
 )
 

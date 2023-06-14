@@ -11,6 +11,7 @@
 #include "DirectoryScanner.h"
 #include "KDirectoryInfo.h"
 #include "model/DirectoryStore.h"
+#include "view_model/kmapper.h"
 #include "utils.h"
 
 using namespace std::chrono_literals;
@@ -100,36 +101,8 @@ DirectoryScanner::prepareDtoAndNotifyEventSinks(
         pMimeInfo = std::make_shared<KMimeSizesInfo>();
         pMimeInfo->fullPath = dirPath;
 
-        const auto& mimeDetailsList = dirDetails.mimeDetailsList.value();
-        auto& mimeSizes = pMimeInfo->mimeSizes;
-        mimeSizes.reserve(static_cast<int>(mimeDetailsList.size()));
-
-        // Отобразить mimeDetailsList в элементы mimeSizes
-        std::transform(mimeDetailsList.cbegin(), mimeDetailsList.cend(),
-            std::back_inserter(mimeSizes), [](auto iter) {
-                KMimeSize rv;
-                auto& mimeDetails_ = iter.second;
-
-                rv.mimeType = iter.first;
-                rv.fileCount = mimeDetails_.fileCount;
-                rv.totalSize = mimeDetails_.totalSize;
-                rv.avgSize = mimeDetails_.fileCount ?
-                    static_cast<float>(mimeDetails_.totalSize) / mimeDetails_.fileCount : 0;
-
-                return rv;
-            });
-
-        // Перенести TMimeDetailsList::ALL_MIMETYPE в начало
-        for (auto iter = mimeSizes.begin(); iter != mimeSizes.end(); ++iter)
-        {
-            const auto mimeSize = *iter;
-            if (mimeSize.mimeType == TMimeDetailsList::ALL_MIMETYPE)
-            {
-                mimeSizes.erase(iter);
-                mimeSizes.push_front(mimeSize);
-                break;
-            }
-        }
+        KMapper::mapTMimeDetailsListToKMimeSizesList(
+            dirDetails.mimeDetailsList.value(), pMimeInfo->mimeSizes);
     }
 
     {
