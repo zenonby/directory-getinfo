@@ -1,4 +1,4 @@
-﻿#ifndef KFILESYSTEMMODEL_H
+#ifndef KFILESYSTEMMODEL_H
 #define KFILESYSTEMMODEL_H
 
 #include <QFileSystemModel>

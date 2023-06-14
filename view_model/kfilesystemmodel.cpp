@@ -1,4 +1,4 @@
-﻿#include <QDebug>
+#include <QDebug>
 #include "kfilesystemmodel.h"
 #include "utils.h"
 

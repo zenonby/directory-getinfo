@@ -1,4 +1,4 @@
-﻿#ifndef DIRECTORYDETAILS_H
+#ifndef DIRECTORYDETAILS_H
 #define DIRECTORYDETAILS_H
 
 #include <optional>

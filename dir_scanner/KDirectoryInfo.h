@@ -1,4 +1,4 @@
-﻿#ifndef KDIRECTORYINFO_H
+#ifndef KDIRECTORYINFO_H
 #define KDIRECTORYINFO_H
 
 #include <memory>

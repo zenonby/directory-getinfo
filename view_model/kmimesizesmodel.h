@@ -1,4 +1,4 @@
-﻿#ifndef KMIMESIZESMODEL_H
+#ifndef KMIMESIZESMODEL_H
 #define KMIMESIZESMODEL_H
 
 #include <QAbstractListModel>

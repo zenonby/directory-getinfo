@@ -1,4 +1,4 @@
-﻿#include <QFont>
+#include <QFont>
 #include "kmimesizesmodel.h"
 
 int

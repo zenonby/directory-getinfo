@@ -1,4 +1,4 @@
-﻿#include "getinfo.h"
+#include "getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
 
 #include <QApplication>

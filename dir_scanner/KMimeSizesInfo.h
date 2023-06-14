@@ -1,4 +1,4 @@
-﻿#ifndef KMIMESIZE_H
+#ifndef KMIMESIZE_H
 #define KMIMESIZE_H
 
 #include <memory>

@@ -1,4 +1,4 @@
-﻿#ifndef GETINFO_H
+#ifndef GETINFO_H
 #define GETINFO_H
 
 #include <thread>

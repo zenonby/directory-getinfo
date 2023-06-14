@@ -1,4 +1,4 @@
-﻿#include <future>
+#include <future>
 #include <QDebug>
 #include "getinfo.h"
 #include "./ui_getinfo.h"

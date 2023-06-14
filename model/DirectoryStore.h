@@ -1,4 +1,4 @@
-﻿#ifndef DIRECTORYSTORE_H
+#ifndef DIRECTORYSTORE_H
 #define DIRECTORYSTORE_H
 
 #include <mutex>

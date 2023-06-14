@@ -1,4 +1,4 @@
-﻿#include "MimeDetails.h"
+#include "MimeDetails.h"
 
 TMimeDetailsList::TMimeDetailsList()
 {

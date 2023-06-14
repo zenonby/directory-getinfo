@@ -1,4 +1,4 @@
-﻿#ifndef DIRECTORYSCANNER_H
+#ifndef DIRECTORYSCANNER_H
 #define DIRECTORYSCANNER_H
 
 #include <set>

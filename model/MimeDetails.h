@@ -1,4 +1,4 @@
-﻿#ifndef MIMEDETAILS_H
+#ifndef MIMEDETAILS_H
 #define MIMEDETAILS_H
 
 #include <map>

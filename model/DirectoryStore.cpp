@@ -1,4 +1,4 @@
-﻿#include "DirectoryStore.h"
+#include "DirectoryStore.h"
 #include "utils.h"
 
 DirectoryStore::DirectoryStore()
