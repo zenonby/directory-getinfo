@@ -9,7 +9,7 @@
 class KMimeSizesModel : public QAbstractListModel
 {
 public:
-    enum { NumColumns = 3 };
+    enum { NumColumns = 4 };
 
     int rowCount(const QModelIndex&) const override;
     int columnCount(const QModelIndex& parent) const override

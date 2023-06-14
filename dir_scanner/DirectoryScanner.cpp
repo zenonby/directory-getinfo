@@ -111,6 +111,7 @@ DirectoryScanner::prepareDtoAndNotifyEventSinks(
                 auto& mimeDetails_ = iter.second;
 
                 rv.mimeType = iter.first;
+                rv.fileCount = mimeDetails_.fileCount;
                 rv.totalSize = mimeDetails_.totalSize;
                 rv.avgSize = mimeDetails_.fileCount ?
                     static_cast<float>(mimeDetails_.totalSize) / mimeDetails_.fileCount : 0;

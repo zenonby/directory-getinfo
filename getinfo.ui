@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>810</width>
-    <height>616</height>
+    <width>920</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,13 +25,13 @@
         <widget class="QTableView" name="tableMimeSizes">
          <property name="minimumSize">
           <size>
-           <width>300</width>
+           <width>400</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>300</width>
+           <width>400</width>
            <height>16777215</height>
           </size>
          </property>
@@ -53,7 +53,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>810</width>
+     <width>920</width>
      <height>18</height>
     </rect>
    </property>

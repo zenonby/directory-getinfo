@@ -10,6 +10,7 @@
 struct KMimeSize
 {
     QString mimeType;
+    unsigned long fileCount = 0;
     unsigned long long totalSize = 0;
     float avgSize = 0;
 };

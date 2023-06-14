@@ -27,9 +27,12 @@ KMimeSizesModel::headerData(int section, Qt::Orientation orientation, int role) 
         returnValue = tr("Mime type");
         break;
     case 1:
+        returnValue = tr("File count");
+        break;
+    case 2:
         returnValue = tr("Total size, B");
         break;
-    case 2: returnValue =
+    case 3: returnValue =
         returnValue = tr("Avg size, B");
         break;
     default:
@@ -69,8 +72,10 @@ KMimeSizesModel::data(const QModelIndex& index, int role) const
         case 0:
             return row.mimeType;
         case 1:
-            return row.totalSize;
+            return static_cast<unsigned long long>(row.fileCount);
         case 2:
+            return row.totalSize;
+        case 3:
             return row.avgSize;
         default:
             assert(!"Unexpected");
