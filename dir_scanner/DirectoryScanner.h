@@ -39,6 +39,7 @@ private:
 	std::optional<QString> m_pendingFocusedParentPath; // Ожидает установки
 	QString m_focusedParentPath;		// Установленный фокус скана
 
+	void checkPendingFocusedParentPathAssignment();
 	void setFocusedPathWithLocking(const QString& dirPath);
 
 	// Состояние сканирования
@@ -74,6 +75,15 @@ private:
 
 	// Удаляет задание из стека
 	void popScanDirectory(DirectoryProcessingStatus status);
+
+	// Удалет уже завершенную задачу из стека при попытке повторного вызова
+	void popReadyScanDirectory();
+
+	// Переносит данные завершенной задачи в родительскую (суммрует)
+	void copyReadyScanDirectoryDataToParent(const WorkState& workState);
+
+	// Удалет задачу, вызвавшую исключение из стека
+	void popErrorScanDirectory(const QString& workDirPath);
 
 	//
 	// Рабочий поток
