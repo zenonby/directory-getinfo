@@ -1,1 +1,1 @@
-# directory-getinfo
+﻿# directory-getinfo
