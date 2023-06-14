@@ -1,6 +1,7 @@
 #ifndef GETINFO_H
 #define GETINFO_H
 
+#include <exception>
 #include <thread>
 #include <mutex>
 #include <QMainWindow>
@@ -28,6 +29,7 @@ public:
 
     virtual void onUpdateDirectoryInfo(KDirectoryInfoPtr pInfo) override;
     virtual void onUpdateMimeSizes(KMimeSizesInfoPtr pInfo) override;
+    virtual void onWorkerException(std::exception_ptr&& pEx) override;
 
 private:
     Ui::GetInfo *ui;
@@ -41,6 +43,7 @@ private:
 
     Q_INVOKABLE void updateDirectoryInfo(KDirectoryInfoPtr pInfo);
     Q_INVOKABLE void updateMimeSizes(KMimeSizesInfoPtr pInfo);
+    Q_INVOKABLE void workerException(const std::exception_ptr& pEx);
 
 private slots:
     void treeDirectoriesSelectionChanged(

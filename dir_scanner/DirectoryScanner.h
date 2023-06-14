@@ -126,6 +126,8 @@ private:
 	TMimeSizesInfoDTOs m_mimeSizesInfos;
 
 	void notifier();
+
+	void handleWorkerException(std::exception_ptr&& pEx) noexcept;
 };
 
 #endif // DIRECTORYSCANNER_H

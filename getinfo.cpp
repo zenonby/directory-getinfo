@@ -1,5 +1,7 @@
 #include <future>
 #include <QDebug>
+#include <QMessageBox>
+
 #include "getinfo.h"
 #include "./ui_getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
@@ -77,6 +79,14 @@ GetInfo::onUpdateMimeSizes(KMimeSizesInfoPtr pInfo)
 }
 
 void
+GetInfo::onWorkerException(std::exception_ptr&& pEx)
+{
+    QMetaObject::invokeMethod(
+        this, "workerException", Qt::QueuedConnection,
+        Q_ARG(std::exception_ptr, pEx));
+}
+
+void
 GetInfo::updateDirectoryInfo(KDirectoryInfoPtr pInfo)
 {
     assert(!!ui);
@@ -94,4 +104,20 @@ GetInfo::updateMimeSizes(KMimeSizesInfoPtr pInfo)
 
     if (m_unifiedSelectedPath == updatedPath)
         m_msModel.setMimeSizes(std::move(pInfo->mimeSizes));
+}
+
+void
+GetInfo::workerException(const std::exception_ptr& pEx)
+{
+    assert(!!ui);
+
+    try
+    {
+        std::rethrow_exception(pEx);
+    }
+    catch (const std::exception& ex)
+    {
+        QMessageBox::critical(this, tr("Error"), ex.what());
+        close();
+    }
 }

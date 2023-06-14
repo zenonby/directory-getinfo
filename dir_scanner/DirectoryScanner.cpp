@@ -412,126 +412,161 @@ DirectoryScanner::stopWorker() noexcept
 void
 DirectoryScanner::worker()
 {
-    while (!isDestroying())
+    try
     {
-        // При выходе из scope
-        auto scopedNotify = scope_guard([&](auto) {
-            setScanRunning(false);
-            m_scanningDone.notify_all();
-        });
-
-        // Выбрать задачу
-        WorkState* workState = nullptr;
-        QString workDirPath;
+        while (!isDestroying())
         {
-            std::unique_lock lock_(m_sync);
-
-            if (m_scanDirectories.empty())
-            {
-                lock_.unlock();
-                std::this_thread::sleep_for(100ms);
-                continue;
-            }
-
-            m_isScanRunning = true;
-            workState = &m_scanDirectories.top();
-            workDirPath = workState->fullPath;
-
-            // Не сканировать выше пути в фокусе
-            if (m_focusedParentPath == workDirPath)
-            {
-                lock_.unlock();
-                std::this_thread::sleep_for(100ms);
-                continue;
-            }
-        }
-
-        // Проверить, не была ли уже просканирована
-        DirectoryDetails workDirDetails;
-        bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, true, workDirDetails);
-        if (res &&
-            (workDirDetails.status == DirectoryProcessingStatus::Ready ||
-             workDirDetails.status == DirectoryProcessingStatus::Error))
-        {
-            std::scoped_lock lock_(m_sync);
-            popReadyScanDirectory();
-        }
-        else
-        {
-            try
-            {
-                // После scanDirectory стек может изменитсья
-                auto unsetWorkState = scope_guard([&](auto) {
-                    workState = 0;
+            // При выходе из scope
+            auto scopedNotify = scope_guard([&](auto) {
+                setScanRunning(false);
+                m_scanningDone.notify_all();
                 });
 
-                prepareDtoAndNotifyEventSinks(workDirPath, workDirDetails);
+            // Выбрать задачу
+            WorkState* workState = nullptr;
+            QString workDirPath;
+            {
+                std::unique_lock lock_(m_sync);
 
-                bool scanned = scanDirectory(workState);
-
-                workDirDetails.subdirectoryCount = workState->subDirCount;
-                workDirDetails.mimeDetailsList = workState->mimeSizes;
-
-                if (scanned)
+                if (m_scanDirectories.empty())
                 {
-                    workDirDetails.status = DirectoryProcessingStatus::Ready;
+                    lock_.unlock();
+                    std::this_thread::sleep_for(100ms);
+                    continue;
+                }
+
+                m_isScanRunning = true;
+                workState = &m_scanDirectories.top();
+                workDirPath = workState->fullPath;
+
+                // Не сканировать выше пути в фокусе
+                if (m_focusedParentPath == workDirPath)
+                {
+                    lock_.unlock();
+                    std::this_thread::sleep_for(100ms);
+                    continue;
+                }
+            }
+
+            // Проверить, не была ли уже просканирована
+            DirectoryDetails workDirDetails;
+            bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, true, workDirDetails);
+            if (res &&
+                (workDirDetails.status == DirectoryProcessingStatus::Ready ||
+                    workDirDetails.status == DirectoryProcessingStatus::Error))
+            {
+                std::scoped_lock lock_(m_sync);
+                popReadyScanDirectory();
+            }
+            else
+            {
+                try
+                {
+                    // После scanDirectory стек может изменитсья
+                    auto unsetWorkState = scope_guard([&](auto) {
+                        workState = 0;
+                        });
+
+                    prepareDtoAndNotifyEventSinks(workDirPath, workDirDetails);
+
+                    bool scanned = scanDirectory(workState);
+
+                    workDirDetails.subdirectoryCount = workState->subDirCount;
+                    workDirDetails.mimeDetailsList = workState->mimeSizes;
+
+                    if (scanned)
+                    {
+                        workDirDetails.status = DirectoryProcessingStatus::Ready;
+
+                        std::scoped_lock lock_(m_sync);
+
+                        assert(workDirPath == m_scanDirectories.top().fullPath);
+                        popScanDirectory(!m_isCancellationRequested ?
+                            DirectoryProcessingStatus::Ready :
+                            DirectoryProcessingStatus::Pending);
+                    }
+                }
+                catch (const std::exception& x)
+                {
+                    qCritical() << "ERROR: " << x.what() << endl;
+
+                    workDirDetails.status = DirectoryProcessingStatus::Error;
 
                     std::scoped_lock lock_(m_sync);
 
-                    assert(workDirPath == m_scanDirectories.top().fullPath);
-                    popScanDirectory(!m_isCancellationRequested ?
-                        DirectoryProcessingStatus::Ready :
-                        DirectoryProcessingStatus::Pending);
+                    popErrorScanDirectory(workDirPath);
                 }
             }
-            catch (const std::exception& x)
-            {
-                qCritical() << "ERROR: " << x.what() << endl;
 
-                workDirDetails.status = DirectoryProcessingStatus::Error;
-
-                std::scoped_lock lock_(m_sync);
-
-                popErrorScanDirectory(workDirPath);
-            }
+            prepareDtoAndNotifyEventSinks(workDirPath, workDirDetails);
         }
-
-        prepareDtoAndNotifyEventSinks(workDirPath, workDirDetails);
+    }
+    catch (...)
+    {
+        handleWorkerException(std::current_exception());
     }
 }
 
 void
 DirectoryScanner::notifier()
 {
-    while (!isDestroying())
+    try
     {
-        std::this_thread::sleep_for(500ms);
-
-        // Проверить, не был ли изменен фокус
-        checkPendingFocusedParentPathAssignment();
-
-        std::scoped_lock lock_(m_sync);
-
-        //
-        // Выбрать текущие накопленные сообщения
-        //
-
-        TDirInfoDTOs dirInfos;
-        dirInfos.swap(m_dirInfos);
-
-        TMimeSizesInfoDTOs mimeSizesInfos;
-        mimeSizesInfos.swap(m_mimeSizesInfos);
-
-        // Уведомить всех потребителей сообщений
-        for (auto sink : m_eventSinks)
+        while (!isDestroying())
         {
-            assert(!!sink);
+            std::this_thread::sleep_for(500ms);
 
-            for (const auto& pairDirInfo : dirInfos)
-                sink->onUpdateDirectoryInfo(pairDirInfo.second);
+            // Проверить, не был ли изменен фокус
+            checkPendingFocusedParentPathAssignment();
 
-            for (const auto& pairMimeSizesInfo : mimeSizesInfos)
-                sink->onUpdateMimeSizes(pairMimeSizesInfo.second);
+            std::scoped_lock lock_(m_sync);
+
+            //
+            // Выбрать текущие накопленные сообщения
+            //
+
+            TDirInfoDTOs dirInfos;
+            dirInfos.swap(m_dirInfos);
+
+            TMimeSizesInfoDTOs mimeSizesInfos;
+            mimeSizesInfos.swap(m_mimeSizesInfos);
+
+            // Уведомить всех потребителей сообщений
+            for (auto sink : m_eventSinks)
+            {
+                assert(!!sink);
+
+                for (const auto& pairDirInfo : dirInfos)
+                    sink->onUpdateDirectoryInfo(pairDirInfo.second);
+
+                for (const auto& pairMimeSizesInfo : mimeSizesInfos)
+                    sink->onUpdateMimeSizes(pairMimeSizesInfo.second);
+            }
+        }
+    }
+    catch (...)
+    {
+        handleWorkerException(std::current_exception());
+    }
+}
+
+void
+DirectoryScanner::handleWorkerException(std::exception_ptr&& pEx) noexcept
+{
+    std::scoped_lock lock_(m_sync);
+
+    // Уведомить всех потребителей сообщений
+    for (auto sink : m_eventSinks)
+    {
+        assert(!!sink);
+
+        try
+        {
+            sink->onWorkerException(std::move(pEx));
+        }
+        catch (...)
+        {
+            assert(0);
         }
     }
 }

@@ -12,6 +12,8 @@ struct IDirectoryScannerEventSink
 	virtual void onUpdateDirectoryInfo(KDirectoryInfoPtr pInfo) = 0;
 
 	virtual void onUpdateMimeSizes(KMimeSizesInfoPtr pInfo) = 0;
+
+	virtual void onWorkerException(std::exception_ptr&& pEx) = 0;
 };
 
 #endif // IDIRECTORYSCANNEREVENTSINK_H
