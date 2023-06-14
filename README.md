@@ -1,3 +1,3 @@
 ﻿# directory-getinfo
 
-Qt5/VS2022
+Qt5 / VS2022
