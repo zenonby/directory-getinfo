@@ -48,8 +48,8 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 		{
 		case 1:
 			return nullptr != dirData && dirData->subDirCount.has_value() ?
-				QVariant(static_cast<unsigned long long>(dirData->subDirCount.value())) :
-				QVariant();
+				QString("%L1").arg(static_cast<unsigned long long>(dirData->subDirCount.value())) :
+				QString();
 			break;
 		case 2:
 			return translateDirectoryProcessingStatus(

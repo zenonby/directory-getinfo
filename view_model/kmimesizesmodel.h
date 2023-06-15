@@ -11,6 +11,16 @@ class KMimeSizesModel : public QAbstractListModel
 public:
     enum { NumColumns = 4 };
 
+    // Округление размеров файлов
+    enum class FileSizeDivisor
+    {
+        Bytes = 0,
+        KBytes,
+        MBytes
+    };
+
+    void setFileSizeDivisor(FileSizeDivisor divisor);
+
     int rowCount(const QModelIndex&) const override;
     int columnCount(const QModelIndex& parent) const override
     {
@@ -24,7 +34,12 @@ public:
     void setMimeSizes(KMimeSizesInfo::KMimeSizesList&& values);
 
 private:
+    FileSizeDivisor m_divisor = FileSizeDivisor::Bytes;
+
     KMimeSizesInfo::KMimeSizesList m_values;
+
+    QString getDivisorSuffix() const noexcept;
+    unsigned int getDivisorValue() const noexcept;
 };
 
 #endif // !KMIMESIZESMODEL_H

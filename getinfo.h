@@ -48,6 +48,10 @@ private:
 private slots:
     void treeDirectoriesSelectionChanged(
         const QItemSelection& selected, const QItemSelection& deselected);
+
+    void switchToBytes();
+    void switchToKBytes();
+    void switchToMBytes();
 };
 
 #endif // GETINFO_H

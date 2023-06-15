@@ -183,14 +183,14 @@ DirectoryScanner::setFocusedPathWithLocking(const QString& dirPath)
 
     std::unique_lock lock_(m_sync);
 
-    m_focusedParentPath = getImmediateParent(unifiedPath);
+    m_workStack.setFocusedPath(unifiedPath);
 
     requestCancellationAndWait(lock_);
 
     // Отменить все задачи до общей родительской
-    while (!m_scanDirectories.empty())
+    while (!m_workStack.empty())
     {
-        const WorkState& workState = m_scanDirectories.top();
+        const WorkState& workState = m_workStack.top();
         auto workDirPath = workState.fullPath;
 
         // Если совпадает с одной из задач из стека, больше ничего не делать
@@ -199,7 +199,7 @@ DirectoryScanner::setFocusedPathWithLocking(const QString& dirPath)
 
         if (!isParentPath(unifiedPath, workDirPath))
         {
-            popScanDirectory(DirectoryProcessingStatus::Pending);
+            m_workStack.popScanDirectory(DirectoryProcessingStatus::Pending);
 
             // Уведомить потребителей сообщений
             DirectoryDetails workDirDetails;
@@ -217,8 +217,8 @@ DirectoryScanner::setFocusedPathWithLocking(const QString& dirPath)
 
     // Крайняя родительская задача
     WorkState topParentWorkState;
-    if (!m_scanDirectories.empty())
-        topParentWorkState = m_scanDirectories.top();
+    if (!m_workStack.empty())
+        topParentWorkState = m_workStack.top();
 
     //
     // Добавить задачи от крайней родительской до dirPath
@@ -245,140 +245,7 @@ DirectoryScanner::setFocusedPathWithLocking(const QString& dirPath)
         WorkState wState;
         wState.fullPath = path;
 
-        pushScanDirectory(wState);
-    }
-}
-
-void
-DirectoryScanner::pushScanDirectory(const WorkState& workState)
-{
-    const auto& workDirPath = workState.fullPath;
-
-    assert(m_scanDirectories.empty() || isParentPath(workDirPath, m_scanDirectories.top().fullPath));
-
-    m_scanDirectories.push(workState);
-
-    //
-    // Проверить статус задачи и при необходимости обновить
-    //
-
-    DirectoryDetails dirDetails;
-    bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, false, dirDetails);
-
-    // Обновить значения в стеке о возможно прерванном сканировании
-    if (res)
-    {
-        auto& workState_ = m_scanDirectories.top();
-
-        if (dirDetails.subdirectoryCount.has_value())
-            workState_.subDirCount = dirDetails.subdirectoryCount.value();
-
-        if (dirDetails.mimeDetailsList.has_value())
-            workState_.mimeSizes = dirDetails.mimeDetailsList.value();
-    }
-
-    // Обновить статус
-    if (!m_focusedParentPath.startsWith(workDirPath) &&
-        (!res ||
-         (DirectoryProcessingStatus::Ready != dirDetails.status &&
-          DirectoryProcessingStatus::Error != dirDetails.status &&
-          DirectoryProcessingStatus::Scanning != dirDetails.status)))
-    {
-        dirDetails.status = DirectoryProcessingStatus::Scanning;
-
-        DirectoryStore::instance()->upsertDirectory(workState.fullPath, dirDetails);
-    }
-}
-
-void
-DirectoryScanner::popReadyScanDirectory()
-{
-    // Просто убрать задачу, не меняя ее статус
-    m_scanDirectories.pop();
-
-    // Также продвинуть вперед родительский итератор
-    if (!m_scanDirectories.empty())
-    {
-        auto& pDirIterator = m_scanDirectories.top().pDirIterator;
-        if (pDirIterator)
-            (*pDirIterator)++;
-    }
-}
-
-void
-DirectoryScanner::popErrorScanDirectory(const QString& workDirPath)
-{
-    // Убрать из стека потенциально добавленные туда дочерние директории
-    while (workDirPath != m_scanDirectories.top().fullPath)
-        popScanDirectory(DirectoryProcessingStatus::Error);
-
-    // Убрать саму директорию
-    assert(!m_scanDirectories.empty() && workDirPath == m_scanDirectories.top().fullPath);
-    popScanDirectory(DirectoryProcessingStatus::Error);
-}
-
-void
-DirectoryScanner::popScanDirectory(DirectoryProcessingStatus status)
-{
-    auto workState = m_scanDirectories.top();
-
-    // Обновить статус задачи
-    DirectoryDetails dirDetails;
-    dirDetails.status = status;
-
-    if (DirectoryProcessingStatus::Ready == status)
-    {
-        dirDetails.subdirectoryCount = workState.subDirCount;
-        dirDetails.mimeDetailsList = workState.mimeSizes;
-    }
-
-    DirectoryStore::instance()->upsertDirectory(workState.fullPath, dirDetails);
-
-    m_scanDirectories.pop();
-
-    // В случае успешного завершения добавить значения к родительской директории
-    if (DirectoryProcessingStatus::Ready == status)
-    {
-        copyReadyScanDirectoryDataToParent(workState);
-    }
-}
-
-void
-DirectoryScanner::copyReadyScanDirectoryDataToParent(const WorkState& workState)
-{
-    const auto& workDirPath = workState.fullPath;
-
-    // В рабочем стеке
-    if (!m_scanDirectories.empty())
-    {
-        auto& parentWorkState = m_scanDirectories.top();
-        parentWorkState.mimeSizes.addMimeDetails(workState.mimeSizes);
-
-        // Также продвинуть вперед итератор
-        if (!!parentWorkState.pDirIterator)
-            (*parentWorkState.pDirIterator)++;
-    }
-
-    // В базе
-    const auto& parentDirPath = getImmediateParent(workDirPath);
-    if (!parentDirPath.isEmpty())
-    {
-        DirectoryDetails parentDirDetails;
-        bool res = DirectoryStore::instance()->tryGetDirectory(
-            parentDirPath, false, parentDirDetails);
-        if (!res)
-        {
-            parentDirDetails.status = DirectoryProcessingStatus::Pending;
-        }
-
-        assert(parentDirDetails.status != DirectoryProcessingStatus::Ready);
-
-        if (!parentDirDetails.mimeDetailsList.has_value())
-            parentDirDetails.mimeDetailsList = workState.mimeSizes;
-        else
-            parentDirDetails.mimeDetailsList.value().addMimeDetails(workState.mimeSizes);
-
-        DirectoryStore::instance()->upsertDirectory(parentDirPath, parentDirDetails);
+        m_workStack.pushScanDirectory(wState);
     }
 }
 
@@ -428,7 +295,7 @@ DirectoryScanner::worker()
             {
                 std::unique_lock lock_(m_sync);
 
-                if (m_scanDirectories.empty())
+                if (m_workStack.empty())
                 {
                     lock_.unlock();
                     std::this_thread::sleep_for(100ms);
@@ -436,11 +303,11 @@ DirectoryScanner::worker()
                 }
 
                 m_isScanRunning = true;
-                workState = &m_scanDirectories.top();
+                workState = &m_workStack.top();
                 workDirPath = workState->fullPath;
 
                 // Не сканировать выше пути в фокусе
-                if (m_focusedParentPath == workDirPath)
+                if (m_workStack.isAboveFocusedPath(workDirPath))
                 {
                     lock_.unlock();
                     std::this_thread::sleep_for(100ms);
@@ -456,7 +323,7 @@ DirectoryScanner::worker()
                     workDirDetails.status == DirectoryProcessingStatus::Error))
             {
                 std::scoped_lock lock_(m_sync);
-                popReadyScanDirectory();
+                m_workStack.popReadyScanDirectory();
             }
             else
             {
@@ -480,8 +347,8 @@ DirectoryScanner::worker()
 
                         std::scoped_lock lock_(m_sync);
 
-                        assert(workDirPath == m_scanDirectories.top().fullPath);
-                        popScanDirectory(!m_isCancellationRequested ?
+                        assert(workDirPath == m_workStack.top().fullPath);
+                        m_workStack.popScanDirectory(!m_isCancellationRequested ?
                             DirectoryProcessingStatus::Ready :
                             DirectoryProcessingStatus::Pending);
                     }
@@ -494,7 +361,7 @@ DirectoryScanner::worker()
 
                     std::scoped_lock lock_(m_sync);
 
-                    popErrorScanDirectory(workDirPath);
+                    m_workStack.popErrorScanDirectory(workDirPath);
                 }
             }
 
@@ -616,7 +483,7 @@ DirectoryScanner::scanDirectory(WorkState* workState)
             workState = 0;
 
             std::scoped_lock lock_(m_sync);
-            pushScanDirectory(wState);
+            m_workStack.pushScanDirectory(wState);
 
             // Сканирование этой директории будет возобновлено,
             //  когда завершится только что созданная задача

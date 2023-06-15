@@ -8,7 +8,7 @@
 #include <filesystem>
 
 #include "IDirectoryScannerEventSink.h"
-#include "model/DirectoryDetails.h"
+#include "model/WorkStack.h"
 
 class DirectoryScanner
 {
@@ -37,25 +37,12 @@ private:
 
 	mutable std::mutex m_syncFocusedParentPath;
 	std::optional<QString> m_pendingFocusedParentPath; // Ожидает установки
-	QString m_focusedParentPath;		// Установленный фокус скана
 
 	void checkPendingFocusedParentPathAssignment();
 	void setFocusedPathWithLocking(const QString& dirPath);
 
-	// Состояние сканирования
-	struct WorkState
-	{
-		// Унифицированный путь
-		QString	fullPath;
-
-		std::shared_ptr<std::filesystem::directory_iterator> pDirIterator;
-
-		unsigned long subDirCount = 0;
-		TMimeDetailsList mimeSizes;
-	};
-
 	// Стэк сканируемых директорий, дочерняя директория наверху
-	std::stack<WorkState> m_scanDirectories;
+	WorkStack m_workStack;
 
 	// Потребители сообщений об обновлении данных
 	std::set<IDirectoryScannerEventSink*> m_eventSinks;
@@ -69,21 +56,6 @@ private:
 
 	// Возвращает true в случае успешного завершения, false в случае отмены или паузы
 	bool scanDirectory(WorkState* workState);
-
-	// Добавляет рабочее задание на стек
-	void pushScanDirectory(const WorkState& workState);
-
-	// Удаляет задание из стека
-	void popScanDirectory(DirectoryProcessingStatus status);
-
-	// Удалет уже завершенную задачу из стека при попытке повторного вызова
-	void popReadyScanDirectory();
-
-	// Переносит данные завершенной задачи в родительскую (суммрует)
-	void copyReadyScanDirectoryDataToParent(const WorkState& workState);
-
-	// Удалет задачу, вызвавшую исключение из стека
-	void popErrorScanDirectory(const QString& workDirPath);
 
 	//
 	// Рабочий поток
@@ -127,6 +99,7 @@ private:
 
 	void notifier();
 
+	// Обработка ошибок рабочих потоков
 	void handleWorkerException(std::exception_ptr&& pEx) noexcept;
 };
 

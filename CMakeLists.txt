@@ -28,6 +28,8 @@ set(PROJECT_SOURCES
         model/DirectoryDetails.h
         model/MimeDetails.cpp
         model/MimeDetails.h
+        model/WorkStack.cpp
+        model/WorkStack.h
         model/DirectoryProcessingStatus.h
         dir_scanner/DirectoryScanner.cpp
         dir_scanner/DirectoryScanner.h

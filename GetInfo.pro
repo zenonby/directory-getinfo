@@ -14,6 +14,7 @@ SOURCES += \
     utils.cpp \
     model/DirectoryStore.cpp \
     model/MimeDetails.cpp \
+    model/WorkStack.cpp \
     view_model/kfilesystemmodel.cpp \
     view_model/kmimesizesmodel.cpp \
     view_model/kmapper.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     model/DirectoryProcessingStatus.h \
     model/DirectoryStore.h \
     model/MimeDetails.h \
+    model/WorkStack.h \
     view_model/kfilesystemmodel.h \
     view_model/kmimesizesmodel.h \
     view_model/kmapper.h \

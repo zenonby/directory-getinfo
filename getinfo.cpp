@@ -27,6 +27,11 @@ GetInfo::GetInfo(QWidget *parent)
 
     ui->tableMimeSizes->setModel(&m_msModel);
 
+    ui->actionSwitchToBytes->setChecked(true);
+    connect(ui->actionSwitchToBytes, SIGNAL(triggered()), this, SLOT(switchToBytes()));
+    connect(ui->actionSwitchToKBytes, SIGNAL(triggered()), this, SLOT(switchToKBytes()));
+    connect(ui->actionSwitchToMBytes, SIGNAL(triggered()), this, SLOT(switchToMBytes()));
+
     DirectoryScanner::instance()->subscribe(this);
 }
 
@@ -61,6 +66,32 @@ GetInfo::treeDirectoriesSelectionChanged(
     }
 }
 
+void
+GetInfo::switchToBytes()
+{
+    ui->actionSwitchToKBytes->setChecked(false);
+    ui->actionSwitchToMBytes->setChecked(false);
+
+    m_msModel.setFileSizeDivisor(KMimeSizesModel::FileSizeDivisor::Bytes);
+}
+
+void
+GetInfo::switchToKBytes()
+{
+    ui->actionSwitchToBytes->setChecked(false);
+    ui->actionSwitchToMBytes->setChecked(false);
+
+    m_msModel.setFileSizeDivisor(KMimeSizesModel::FileSizeDivisor::KBytes);
+}
+
+void
+GetInfo::switchToMBytes()
+{
+    ui->actionSwitchToBytes->setChecked(false);
+    ui->actionSwitchToKBytes->setChecked(false);
+
+    m_msModel.setFileSizeDivisor(KMimeSizesModel::FileSizeDivisor::MBytes);
+}
 
 void
 GetInfo::onUpdateDirectoryInfo(KDirectoryInfoPtr pInfo)

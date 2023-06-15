@@ -1,6 +1,55 @@
 #include <QFont>
 #include "kmimesizesmodel.h"
 
+void
+KMimeSizesModel::setFileSizeDivisor(FileSizeDivisor divisor)
+{
+    bool changed = m_divisor != divisor;
+    m_divisor = divisor;
+
+    if (changed)
+    {
+        emit dataChanged(index(0, 0), index(m_values.count() - 1, NumColumns - 1));
+        emit headerDataChanged(Qt::Horizontal, 0, NumColumns - 1);
+    }
+}
+
+QString
+KMimeSizesModel::getDivisorSuffix() const noexcept
+{
+    switch (m_divisor)
+    {
+    case FileSizeDivisor::Bytes:
+        return tr("B");
+    case FileSizeDivisor::KBytes:
+        return tr("KB");
+    case FileSizeDivisor::MBytes:
+        return tr("MB");
+    default:
+        assert(!"Unexpected FileSizeDivisor value");
+    }
+
+    return "";
+}
+
+unsigned int
+KMimeSizesModel::getDivisorValue() const noexcept
+{
+    switch (m_divisor)
+    {
+    case FileSizeDivisor::Bytes:
+        return 1;
+    case FileSizeDivisor::KBytes:
+        return 1024;
+    case FileSizeDivisor::MBytes:
+        return 1024 * 1024;
+    default:
+        assert(!"Unexpected FileSizeDivisor value");
+    }
+
+    return 1;
+}
+
 int
 KMimeSizesModel::rowCount(const QModelIndex&) const
 {
@@ -30,10 +79,10 @@ KMimeSizesModel::headerData(int section, Qt::Orientation orientation, int role) 
         returnValue = tr("File count");
         break;
     case 2:
-        returnValue = tr("Total size, B");
+        returnValue = tr("Total size, ") + getDivisorSuffix();
         break;
     case 3: returnValue =
-        returnValue = tr("Avg size, B");
+        returnValue = tr("Avg size, ") + getDivisorSuffix();
         break;
     default:
         assert(!"Unexpected");
@@ -59,6 +108,8 @@ KMimeSizesModel::data(const QModelIndex& index, int role) const
         return font;
     }
 
+    unsigned int divisorValue = getDivisorValue();
+
     if (Qt::DisplayRole == role &&
         index.isValid())
     {
@@ -72,11 +123,11 @@ KMimeSizesModel::data(const QModelIndex& index, int role) const
         case 0:
             return row.mimeType;
         case 1:
-            return static_cast<unsigned long long>(row.fileCount);
+            return QString("%L1").arg(static_cast<unsigned long long>(row.fileCount));
         case 2:
-            return row.totalSize;
+            return QString("%L1").arg(row.totalSize / divisorValue);
         case 3:
-            return row.avgSize;
+            return QString("%L1").arg(round(row.avgSize / static_cast<float>(divisorValue) * 1000) / 1000.f);
         default:
             assert(!"Unexpected");
             return QVariant();
@@ -103,7 +154,7 @@ KMimeSizesModel::setMimeSizes(KMimeSizesInfo::KMimeSizesList&& values)
     m_values.swap(values);
 
     if (0 < newRowCount)
-        emit dataChanged(index(0, 0), index(newRowCount - 1, NumColumns));
+        emit dataChanged(index(0, 0), index(newRowCount - 1, NumColumns - 1));
 
     if (rowsAdded)
         endInsertRows();
