@@ -52,5 +52,8 @@ getImmediateParent(const QString unifiedPath)
 		parentPath = getUnifiedPathName(parentPath);
 	}
 
+	// Make sure that parent path is also in unified format
+	assert(isUnifiedPath(parentPath));
+
 	return parentPath;
 }

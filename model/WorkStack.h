@@ -42,6 +42,9 @@ public:
 	// Удалет уже завершенную задачу из стека при попытке повторного вызова
 	void popReadyScanDirectory();
 
+	// Removes disabled scan directory from the stack
+	void popDisabledScanDirectory();
+
 	// Переносит данные завершенной задачи в родительскую (суммрует)
 	void copyReadyScanDirectoryDataToParent(const WorkState& workState);
 

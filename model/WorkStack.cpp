@@ -106,14 +106,28 @@ WorkStack::popScanDirectory(DirectoryProcessingStatus status)
 void
 WorkStack::popReadyScanDirectory()
 {
-    // Просто убрать задачу, не меняя ее статус
+    // Just remove without changing status
     m_scanDirectories.pop();
 
-    // Также продвинуть вперед родительский итератор
+    // Also move forward parent's directory iterator
     if (!m_scanDirectories.empty())
     {
         auto& pDirIterator = m_scanDirectories.top().pDirIterator;
-        if (pDirIterator)
+        if (!!pDirIterator)
+            (*pDirIterator)++;
+    }
+}
+
+void
+WorkStack::popDisabledScanDirectory()
+{
+    popScanDirectory(DirectoryProcessingStatus::Skipped);
+
+    // Also move forward parent's directory iterator
+    if (!m_scanDirectories.empty())
+    {
+        auto& pDirIterator = m_scanDirectories.top().pDirIterator;
+        if (!!pDirIterator)
             (*pDirIterator)++;
     }
 }
@@ -157,8 +171,6 @@ WorkStack::copyReadyScanDirectoryDataToParent(const WorkState& workState)
         {
             parentDirDetails.status = DirectoryProcessingStatus::Pending;
         }
-
-        assert(parentDirDetails.status != DirectoryProcessingStatus::Ready);
 
         if (!parentDirDetails.mimeDetailsList.has_value())
             parentDirDetails.mimeDetailsList = workState.mimeSizes;

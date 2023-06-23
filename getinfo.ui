@@ -13,6 +13,13 @@
   <property name="windowTitle">
    <string>GetInfo</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/resources/get_info.png</normaloff>:/icons/resources/get_info.png</iconset>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -77,27 +84,41 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/div_b.png</normaloff>:/icons/resources/div_b.png</iconset>
+   </property>
    <property name="text">
-    <string>B </string>
+    <string>Switch to Bytes</string>
    </property>
   </action>
   <action name="actionSwitchToKBytes">
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/div_kb.png</normaloff>:/icons/resources/div_kb.png</iconset>
+   </property>
    <property name="text">
-    <string>Kb</string>
+    <string>Switch to KBytes</string>
    </property>
   </action>
   <action name="actionSwitchToMBytes">
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/div_mb.png</normaloff>:/icons/resources/div_mb.png</iconset>
+   </property>
    <property name="text">
-    <string>Mb</string>
+    <string>Switch to MBytes</string>
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

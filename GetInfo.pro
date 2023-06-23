@@ -15,6 +15,7 @@ SOURCES += \
     model/DirectoryStore.cpp \
     model/MimeDetails.cpp \
     model/WorkStack.cpp \
+    model/DirectoryScanSwitch.cpp \
     view_model/kfilesystemmodel.cpp \
     view_model/kmimesizesmodel.cpp \
     view_model/kmapper.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     model/DirectoryStore.h \
     model/MimeDetails.h \
     model/WorkStack.h \
+    model/DirectoryScanSwitch.h \
     view_model/kfilesystemmodel.h \
     view_model/kmimesizesmodel.h \
     view_model/kmapper.h \
@@ -43,3 +45,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

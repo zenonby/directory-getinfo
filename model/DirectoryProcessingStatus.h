@@ -7,7 +7,8 @@ enum class DirectoryProcessingStatus
 	Pending = 0,
 	Scanning,
 	Ready,
-	Error
+	Skipped,
+	Error,
 };
 
 #endif // DIRECTORYPROCESSINGSTATUS_H

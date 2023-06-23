@@ -31,6 +31,8 @@ set(PROJECT_SOURCES
         model/WorkStack.cpp
         model/WorkStack.h
         model/DirectoryProcessingStatus.h
+        model/DirectoryScanSwitch.cpp
+        model/DirectoryScanSwitch.h
         dir_scanner/DirectoryScanner.cpp
         dir_scanner/DirectoryScanner.h
         dir_scanner/IDirectoryScannerEventSink.h
@@ -43,6 +45,7 @@ set(PROJECT_SOURCES
         view_model/kmapper.cpp
         view_model/kmapper.h
         getinfo.ui
+        resources.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

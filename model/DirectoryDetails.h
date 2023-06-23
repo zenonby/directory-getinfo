@@ -9,13 +9,14 @@
 struct DirectoryDetails
 {
 	DirectoryProcessingStatus status;
+	bool scan = false;
 	std::optional<unsigned long> subdirectoryCount = {};
 	std::optional<TMimeDetailsList> mimeDetailsList = {};
 
 	DirectoryDetails clone(bool cloneMimeDetails) const
 	{
 		DirectoryDetails retVal{
-			status, subdirectoryCount,
+			status, scan, subdirectoryCount,
 			cloneMimeDetails ? mimeDetailsList : std::optional<TMimeDetailsList>{}
 		};
 		return retVal;

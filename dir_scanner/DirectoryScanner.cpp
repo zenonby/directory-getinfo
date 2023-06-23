@@ -10,6 +10,7 @@
 
 #include "DirectoryScanner.h"
 #include "KDirectoryInfo.h"
+#include "model/DirectoryScanSwitch.h"
 #include "model/DirectoryStore.h"
 #include "view_model/kmapper.h"
 #include "utils.h"
@@ -315,15 +316,25 @@ DirectoryScanner::worker()
                 }
             }
 
-            // Проверить, не была ли уже просканирована
             DirectoryDetails workDirDetails;
-            bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, true, workDirDetails);
-            if (res &&
+            bool res = false;
+            bool enableScan = false;
+
+            // Check if scanned before
+            if ((res = DirectoryStore::instance()->tryGetDirectory(workDirPath, true, workDirDetails)) &&
                 (workDirDetails.status == DirectoryProcessingStatus::Ready ||
                     workDirDetails.status == DirectoryProcessingStatus::Error))
             {
                 std::scoped_lock lock_(m_sync);
                 m_workStack.popReadyScanDirectory();
+            }
+            // Check if skipped (only after checking if scanned before in order to avoid multiple scans)
+            else if (!(enableScan = DirectoryScanSwitch::instance()->isEnabled(workDirPath)))
+            {
+                std::scoped_lock lock_(m_sync);
+
+                workDirDetails.status = DirectoryProcessingStatus::Skipped;
+                m_workStack.popDisabledScanDirectory();
             }
             else
             {
