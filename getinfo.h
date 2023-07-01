@@ -1,4 +1,4 @@
-#ifndef GETINFO_H
+﻿#ifndef GETINFO_H
 #define GETINFO_H
 
 #include <exception>
@@ -44,6 +44,13 @@ private:
     Q_INVOKABLE void updateDirectoryInfo(KDirectoryInfoPtr pInfo);
     Q_INVOKABLE void updateMimeSizes(KMimeSizesInfoPtr pInfo);
     Q_INVOKABLE void workerException(const std::exception_ptr& pEx);
+
+    void readSettings();
+    void writeSettings();
+
+protected:
+    virtual void showEvent(QShowEvent* event) override;
+    virtual void closeEvent(QCloseEvent* event) override;
 
 private slots:
     void treeDirectoriesSelectionChanged(

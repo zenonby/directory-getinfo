@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         getinfo.h
         utils.cpp
         utils.h
+        settings.cpp
+        settings.h
         model/DirectoryStore.cpp
         model/DirectoryStore.h
         model/DirectoryDetails.h

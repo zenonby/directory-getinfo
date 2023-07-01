@@ -11,7 +11,7 @@ KFileSystemModel::KFileSystemModel()
 #endif // !Q_OS_WIN
 
 #if _DEBUG
-	rootPath = "W:/Temp/5";
+//	rootPath = "";
 #endif
 
 	setRootPath(rootPath);

@@ -6,6 +6,13 @@
 #include "./ui_getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
 #include "utils.h"
+#include "settings.h"
+
+#define WINDOW_PREFIX "window"
+#define DIVISOR_NAME WINDOW_PREFIX "/divisor"
+#define DIVISOR_VALUE_B "B"
+#define DIVISOR_VALUE_KB "KB"
+#define DIVISOR_VALUE_MB "MB"
 
 GetInfo::GetInfo(QWidget *parent)
     : QMainWindow(parent),
@@ -69,6 +76,9 @@ GetInfo::treeDirectoriesSelectionChanged(
 void
 GetInfo::switchToBytes()
 {
+    if (!ui->actionSwitchToBytes->isChecked())
+        ui->actionSwitchToBytes->setChecked(true);
+
     ui->actionSwitchToKBytes->setChecked(false);
     ui->actionSwitchToMBytes->setChecked(false);
 
@@ -78,6 +88,9 @@ GetInfo::switchToBytes()
 void
 GetInfo::switchToKBytes()
 {
+    if (!ui->actionSwitchToKBytes->isChecked())
+        ui->actionSwitchToKBytes->setChecked(true);
+
     ui->actionSwitchToBytes->setChecked(false);
     ui->actionSwitchToMBytes->setChecked(false);
 
@@ -87,6 +100,9 @@ GetInfo::switchToKBytes()
 void
 GetInfo::switchToMBytes()
 {
+    if (!ui->actionSwitchToMBytes->isChecked())
+        ui->actionSwitchToMBytes->setChecked(true);
+
     ui->actionSwitchToBytes->setChecked(false);
     ui->actionSwitchToKBytes->setChecked(false);
 
@@ -151,4 +167,60 @@ GetInfo::workerException(const std::exception_ptr& pEx)
         QMessageBox::critical(this, tr("Error"), ex.what());
         close();
     }
+}
+
+void
+GetInfo::showEvent(QShowEvent* event)
+{
+    QMainWindow::showEvent(event);
+
+    readSettings();
+}
+
+void
+GetInfo::closeEvent(QCloseEvent* event)
+{
+    QMainWindow::closeEvent(event);
+
+    if (event->isAccepted())
+    {
+        writeSettings();
+    }
+}
+
+void
+GetInfo::readSettings()
+{
+    Settings* settings = Settings::instance();
+
+    QString sDivisor = settings->value(DIVISOR_NAME).toString();
+    if (!sDivisor.isEmpty())
+    {
+        if (sDivisor == DIVISOR_VALUE_B)
+            switchToBytes();
+        else if (sDivisor == DIVISOR_VALUE_KB)
+            switchToKBytes();
+        else if (sDivisor == DIVISOR_VALUE_MB)
+            switchToMBytes();
+        else
+        {
+            assert(!"Unknown value");
+            switchToBytes();
+        }
+    }
+}
+
+void
+GetInfo::writeSettings()
+{
+    Settings* settings = Settings::instance();
+
+    if (ui->actionSwitchToBytes->isChecked())
+        settings->setValue(DIVISOR_NAME, DIVISOR_VALUE_B);
+    else if (ui->actionSwitchToKBytes->isChecked())
+        settings->setValue(DIVISOR_NAME, DIVISOR_VALUE_KB);
+    else if (ui->actionSwitchToMBytes->isChecked())
+        settings->setValue(DIVISOR_NAME, DIVISOR_VALUE_MB);
+    else
+        assert(!"Unexpected divisor selection");
 }

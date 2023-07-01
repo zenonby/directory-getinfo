@@ -1,8 +1,14 @@
 #include "utils.h"
+#include "settings.h"
 #include "DirectoryScanSwitch.h"
+
+#define DIRECTORY_SCAN_SWITCH_PREFIX "directory_scan_switches"
+#define DIRECTORY_SCAN_SWITCH_ENABLED_PREFIX DIRECTORY_SCAN_SWITCH_PREFIX "/enabled"
+#define DIRECTORY_SCAN_SWITCH_DISABLED_PREFIX DIRECTORY_SCAN_SWITCH_PREFIX "/disabled"
 
 DirectoryScanSwitch::DirectoryScanSwitch()
 {
+	readSettings();
 }
 
 DirectoryScanSwitch*
@@ -10,6 +16,56 @@ DirectoryScanSwitch::instance()
 {
 	static DirectoryScanSwitch s_instance;
 	return &s_instance;
+}
+
+void
+DirectoryScanSwitch::fini()
+{
+	std::scoped_lock lock_(m_sync);
+
+	writeSettings();
+}
+
+void
+DirectoryScanSwitch::readSettings()
+{
+	const auto& enabled = Settings::instance()->readArray(DIRECTORY_SCAN_SWITCH_ENABLED_PREFIX);
+	const auto& disabled = Settings::instance()->readArray(DIRECTORY_SCAN_SWITCH_DISABLED_PREFIX);
+
+	std::for_each(enabled.cbegin(), enabled.cend(), [&](auto path) {
+		const QString& sPath = path.toString();
+		if (!sPath.isEmpty())
+			m_scanSwitches.emplace(std::make_pair(sPath, true));
+	});
+
+	std::for_each(disabled.cbegin(), disabled.cend(), [&](auto path) {
+		const QString& sPath = path.toString();
+		if (!sPath.isEmpty())
+			m_scanSwitches.emplace(std::make_pair(sPath, false));
+	});
+}
+
+void
+DirectoryScanSwitch::writeSettings()
+{
+	Settings::TValueArray enabled, disabled;
+
+	enabled.reserve(m_scanSwitches.size());
+	disabled.reserve(m_scanSwitches.size());
+
+	for (auto iter = m_scanSwitches.cbegin(); iter != m_scanSwitches.cend(); ++iter)
+	{
+		const auto& path = iter->first;
+		bool isEnabled = iter->second;
+
+		if (isEnabled)
+			enabled.push_back(path);
+		else
+			disabled.push_back(path);
+	}
+
+	Settings::instance()->writeArray(DIRECTORY_SCAN_SWITCH_ENABLED_PREFIX, enabled);
+	Settings::instance()->writeArray(DIRECTORY_SCAN_SWITCH_DISABLED_PREFIX, disabled);
 }
 
 bool

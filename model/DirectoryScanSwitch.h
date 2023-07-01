@@ -17,6 +17,9 @@ class DirectoryScanSwitch
 public:
 	static DirectoryScanSwitch* instance();
 
+	// Call to persist state before destruction
+	void fini();
+
 	bool isEnabled(const QString& unifiedPath) const noexcept;
 	void setEnabled(const QString& unifiedPath, bool enableScan = true);
 
@@ -28,6 +31,9 @@ private:
 		QString,	// unified path
 		bool		// scan directory
 	> m_scanSwitches;
+
+	void readSettings();
+	void writeSettings();
 };
 
 #endif // DIRECTORYSCANSWITCH_H

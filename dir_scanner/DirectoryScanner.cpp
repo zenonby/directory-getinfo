@@ -288,7 +288,7 @@ DirectoryScanner::worker()
             auto scopedNotify = scope_guard([&](auto) {
                 setScanRunning(false);
                 m_scanningDone.notify_all();
-                });
+            });
 
             // Выбрать задачу
             WorkState* workState = nullptr;
@@ -323,7 +323,7 @@ DirectoryScanner::worker()
             // Check if scanned before
             if ((res = DirectoryStore::instance()->tryGetDirectory(workDirPath, true, workDirDetails)) &&
                 (workDirDetails.status == DirectoryProcessingStatus::Ready ||
-                    workDirDetails.status == DirectoryProcessingStatus::Error))
+                 workDirDetails.status == DirectoryProcessingStatus::Error))
             {
                 std::scoped_lock lock_(m_sync);
                 m_workStack.popReadyScanDirectory();
