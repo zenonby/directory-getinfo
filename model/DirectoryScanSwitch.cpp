@@ -60,11 +60,10 @@ DirectoryScanSwitch::setEnabled(const QString& unifiedPath, bool enableScan)
 			{
 				bool parentEnabled = iter->second;
 				if (parentEnabled == enableScan)
-				{
 					// Nothing to be set then. Value is inherited from this parent.
 					insertValue = false;
-					break;
-				}
+
+				break;
 			}
 		}
 
