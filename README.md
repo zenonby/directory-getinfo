@@ -1,6 +1,8 @@
 ﻿# directory-getinfo
 
-Qt5 / VS2022
+Build system:
+* VS2022 - cmake
+* Qt5 - qmake
 
 Ubuntu builds:
 * In order to fix an issue with xcb plugin while starting QtCreator (_qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "..." even though it was found._) execute:
