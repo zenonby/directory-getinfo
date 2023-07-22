@@ -4,17 +4,19 @@
 #include <memory>
 #include <QString>
 
-// Унифицированный путь для сравнения путей
+// Converts to unified path in order to avoid ambiguities
 QString getUnifiedPathName(const QString& path);
 
-// Яв-ся ли путь унифицированным
+// Checks if path is unified
 bool isUnifiedPath(const QString& path);
 
-// Является ли parentUnifiedPath одной из родительских для childUnifiedPath
+// Checks if parentUnifiedPath is one parent firectories for childUnifiedPath
 bool isParentPath(const QString& childUnifiedPath, const QString& parentUnifiedPath);
 
-// Непосредственная родительская директория или пустая строка
+// Immediate parent directory or null if no parent
 QString getImmediateParent(const QString unifiedPath);
+
+std::string getDirectoryFromFilePath(const std::string& filePath);
 
 template<class TFunc>
 auto scope_guard(TFunc&& func) {

@@ -1,3 +1,4 @@
+#include <filesystem>
 #include "DirectoryStore.h"
 #include "utils.h"
 #include "settings.h"
@@ -6,6 +7,15 @@ DirectoryStore::DirectoryStore()
 	: m_db(nullptr)
 {
 	const auto& dbFileName = Settings::instance()->dbFileName();
+    const auto& dbDir = getDirectoryFromFilePath(dbFileName);
+
+    // Create directory for DB file if the dir does not exist
+    std::error_code err;
+    if (!std::filesystem::exists(dbDir) &&
+        !std::filesystem::create_directories(dbDir, err))
+    {
+        throw std::logic_error(err.message());
+    }
 
 	auto rc = sqlite3_open(dbFileName.c_str(), &m_db);
 	if (rc)
