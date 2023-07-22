@@ -15,6 +15,10 @@ public:
 	// Call to save changes explicitly
 	void fini();
 
+	// Directory where ini file, DB file and other possible files are stored
+	const QString& directory() const;
+	const std::string& dbFileName() const;
+
 	void setValue(const QString& key, const QVariant& value);
 	QVariant value(const QString& key, const QVariant& defaultValue = QVariant()) const;
 
@@ -28,6 +32,9 @@ private:
 	Settings& operator=(const Settings&) = delete;
 
 	mutable std::mutex m_sync;
+
+	QString m_settingsDirectory;
+	std::string m_dbFileName;
 
 	static QString getArraySizeValueName(const QString& prefix);
 };

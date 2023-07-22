@@ -1,12 +1,21 @@
 #include "DirectoryStore.h"
 #include "utils.h"
+#include "settings.h"
 
 DirectoryStore::DirectoryStore()
+	: m_db(nullptr)
 {
+	const auto& dbFileName = Settings::instance()->dbFileName();
+
+	auto rc = sqlite3_open(dbFileName.c_str(), &m_db);
+	if (rc)
+		throw std::logic_error(sqlite3_errmsg(m_db));
 }
 
 DirectoryStore::~DirectoryStore()
 {
+	sqlite3_close(m_db);
+	m_db = nullptr;
 }
 
 DirectoryStore*

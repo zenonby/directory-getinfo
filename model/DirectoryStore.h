@@ -5,6 +5,8 @@
 #include <map>
 #include <QString>
 
+#include "libs/sqlite3/sqlite3.h"
+
 #include "DirectoryDetails.h"
 
 class DirectoryStore
@@ -38,6 +40,8 @@ private:
 		QString,	// Унифицированный путь
 		DirectoryDetails
 	> m_directories;
+
+	sqlite3* m_db;
 };
 
 #endif // DIRECTORYSTORE_H

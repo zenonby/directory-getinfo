@@ -1,5 +1,7 @@
 #include <QDebug>
 #include <QCoreApplication>
+#include <QFileInfo>
+#include <QDir>
 #include "settings.h"
 #include "utils.h"
 
@@ -9,9 +11,14 @@ Settings::Settings()
 	: QSettings(
 		QSettings::IniFormat,
 		QSettings::UserScope,
-		QCoreApplication::organizationName(),
+		QCoreApplication::organizationName() + "/" + QCoreApplication::applicationName(),
 		QCoreApplication::applicationName())
 {
+	QFileInfo fi(fileName());
+	m_settingsDirectory = fi.absolutePath();
+	m_dbFileName = QDir(m_settingsDirectory)
+		.filePath(QCoreApplication::applicationName() + ".db")
+		.toStdString();
 }
 
 Settings*
@@ -26,6 +33,18 @@ Settings::fini()
 {
 	std::scoped_lock lock_(m_sync);
 	sync();
+}
+
+const QString&
+Settings::directory() const
+{
+	return m_settingsDirectory;
+}
+
+const std::string&
+Settings::dbFileName() const
+{
+	return m_dbFileName;
 }
 
 void

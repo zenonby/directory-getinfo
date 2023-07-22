@@ -40,6 +40,9 @@ HEADERS += \
     dir_scanner/KDirectoryInfo.h \
     dir_scanner/KMimeSizesInfo.h \
 
+LIBS += \
+    -L$$PWD/libs/sqlite3 -lsqlite3
+
 FORMS += \
     getinfo.ui
 

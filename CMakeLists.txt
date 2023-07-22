@@ -11,11 +11,16 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+SET(CMAKE_DEBUG_POSTFIX "d")
+
 # N.B. $QT_DIR environment variable must be defined
 set (CMAKE_PREFIX_PATH "$ENV{QT_DIR}\\${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}\\msvc2017_64\\")
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+
+# Build sqlite3 library
+add_subdirectory(libs/sqlite3)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -73,7 +78,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(GetInfo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(GetInfo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets sqlite3)
+# target_link_libraries(sqlite3d -static)
 
 set_target_properties(GetInfo PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
