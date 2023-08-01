@@ -240,27 +240,13 @@ GetInfo::startSavingSnapshot()
         tr("Save results to database"),
         tr("Please wait..."),
         std::bind(&GetInfo::saveSnapshot, this),
-        std::bind(&GetInfo::onCompleteSavingSnapshot, this, _1),
+        std::bind(&GetInfo::onCompleteSavingSnapshot, this),
         nullptr);
 }
 
 void
-GetInfo::onCompleteSavingSnapshot(std::future<void>&& futComplete)
+GetInfo::onCompleteSavingSnapshot()
 {
-    // Handle possible exceptions from the wroker thread
-    try
-    {
-        futComplete.get();
-    }
-    catch (const std::exception& ex)
-    {
-        QMessageBox::critical(this, tr("Error"), ex.what());
-    }
-    catch (...)
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Unexpected error"));
-    }
-
     // Delete after handling future
     m_progressDlg.reset();
 }

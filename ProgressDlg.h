@@ -9,22 +9,25 @@ class ProgressDlg : public QObject
 {
     Q_OBJECT;
 
-    std::function<void(void)> m_worker;
-    std::function<void(std::future<void> futCompletion)> m_onComplete;
-    std::function<void(void)> m_onCancel;
-
 public:
+    typedef std::function<void(void)> TCallback;
+
     ProgressDlg(QWidget* parent,
         const QString& windowTitle,
         const QString& labelText,
-        std::function<void(void)> worker,
-        std::function<void(std::future<void> futCompletion)> onComplete,
-        std::function<void(void)> onCancel);
+        TCallback worker,
+        TCallback onComplete,
+        TCallback onCancel);
 
 private:
     QWidget* m_parent;
     const QString& m_windowTitle;
     const QString& m_labelText;
+
+    // Callbacks
+    TCallback m_worker;
+    TCallback m_onComplete;
+    TCallback m_onCancel;
 
     typedef std::unique_ptr<QProgressDialog> TProgressDialogPtr;
     TProgressDialogPtr m_progressDlg;

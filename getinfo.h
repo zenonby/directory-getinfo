@@ -54,7 +54,7 @@ private:
     std::unique_ptr<ProgressDlg> m_progressDlg;
 
     void saveSnapshot();
-    void onCompleteSavingSnapshot(std::future<void>&& futComplete);
+    void onCompleteSavingSnapshot();
 
 protected:
     virtual void showEvent(QShowEvent* event) override;

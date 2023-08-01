@@ -1,11 +1,12 @@
+#include <QMessageBox>
 #include "ProgressDlg.h"
 
 ProgressDlg::ProgressDlg(QWidget* parent,
     const QString& windowTitle,
     const QString& labelText,
-    std::function<void(void)> worker,
-    std::function<void(std::future<void> futCompletion)> onComplete,
-    std::function<void(void)> onCancel)
+    TCallback worker,
+    TCallback onComplete,
+    TCallback onCancel)
     : m_parent(parent),
       m_windowTitle(windowTitle),
       m_labelText(labelText),
@@ -75,10 +76,21 @@ ProgressDlg::complete()
     m_progressDlg->close();
     m_progressDlg.reset();
 
-    // Take ownership from the object being destroyed in the complete handler
-    decltype(m_progressPromise) progressPromise = std::move(m_progressPromise);
+    // Handle possible exceptions from the wroker thread
+    try
+    {
+        m_progressPromise->get_future().get();
+    }
+    catch (const std::exception& ex)
+    {
+        QMessageBox::critical(m_parent, tr("Error"), ex.what());
+    }
+    catch (...)
+    {
+        QMessageBox::critical(m_parent, tr("Error"), tr("Unexpected error"));
+    }
 
-    m_onComplete(progressPromise->get_future());
+    m_onComplete();
 }
 
 void
