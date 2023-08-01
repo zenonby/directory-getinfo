@@ -149,9 +149,10 @@ KFileSystemModel::setDirectoryChecked(const QModelIndex& index_, bool checked)
 	emit dataChanged(index_, index_);
 
 	// Also check/uncheck children
-	QMetaObject::invokeMethod(
+	bool res = QMetaObject::invokeMethod(
 		this, "emitDataChangedForChildren", Qt::QueuedConnection,
 		Q_ARG(const QModelIndex&, index_));
+	assert(res);
 }
 
 void
@@ -164,9 +165,10 @@ KFileSystemModel::emitDataChangedForChildren(const QModelIndex& parentIndex)
 		emit dataChanged(index_, index_);
 
 		// Also check/uncheck children
-		QMetaObject::invokeMethod(
+		bool res = QMetaObject::invokeMethod(
 			this, "emitDataChangedForChildren", Qt::QueuedConnection,
 			Q_ARG(const QModelIndex&, index_));
+		assert(res);
 	}
 }
 

@@ -1,5 +1,6 @@
 sqlite3.pro.user
 build-sqlite3-*
 *.lib
+*.pdb
 *.a
 

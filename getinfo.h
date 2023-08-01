@@ -3,10 +3,12 @@
 
 #include <exception>
 #include <thread>
+#include <future>
 #include <mutex>
 #include <QMainWindow>
 #include <QItemSelectionModel>
 
+#include "ProgressDlg.h"
 #include "view_model/kfilesystemmodel.h"
 #include "view_model/kmimesizesmodel.h"
 #include "dir_scanner/IDirectoryScannerEventSink.h"
@@ -20,7 +22,7 @@ class GetInfo : public QMainWindow, IDirectoryScannerEventSink
     Q_OBJECT
 
 public:
-    GetInfo(QWidget *parent = nullptr);
+    GetInfo(QWidget* parent = nullptr);
     ~GetInfo();
 
     //
@@ -32,6 +34,7 @@ public:
     virtual void onWorkerException(std::exception_ptr&& pEx) override;
 
 private:
+
     Ui::GetInfo *ui;
 
     // Унифицированный путь текущей выбранной директории
@@ -44,9 +47,14 @@ private:
     Q_INVOKABLE void updateDirectoryInfo(KDirectoryInfoPtr pInfo);
     Q_INVOKABLE void updateMimeSizes(KMimeSizesInfoPtr pInfo);
     Q_INVOKABLE void workerException(const std::exception_ptr& pEx);
-
+    
     void readSettings();
     void writeSettings();
+
+    std::unique_ptr<ProgressDlg> m_progressDlg;
+
+    void saveSnapshot();
+    void onCompleteSavingSnapshot(std::future<void>&& futComplete);
 
 protected:
     virtual void showEvent(QShowEvent* event) override;
@@ -59,6 +67,9 @@ private slots:
     void switchToBytes();
     void switchToKBytes();
     void switchToMBytes();
+
+    // Saves scan results to DB
+    void startSavingSnapshot();
 };
 
 #endif // GETINFO_H

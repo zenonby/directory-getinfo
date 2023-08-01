@@ -4,5 +4,6 @@
         <file>resources/div_kb.png</file>
         <file>resources/div_mb.png</file>
         <file>resources/get_info.png</file>
+        <file>resources/save.png</file>
     </qresource>
 </RCC>

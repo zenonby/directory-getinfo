@@ -13,6 +13,7 @@ SOURCES += \
     getinfo.cpp \
     utils.cpp \
     settings.cpp \
+    ProgressDlg.cpp \
     model/DirectoryStore.cpp \
     model/MimeDetails.cpp \
     model/WorkStack.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     getinfo.h \
     utils.h \
     settings.h \
+    ProgressDlg.h \
     model/DirectoryDetails.h \
     model/DirectoryProcessingStatus.h \
     model/DirectoryStore.h \

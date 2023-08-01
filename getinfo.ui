@@ -76,6 +76,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionSaveSnapshot"/>
+   <addaction name="separator"/>
    <addaction name="actionSwitchToBytes"/>
    <addaction name="actionSwitchToKBytes"/>
    <addaction name="actionSwitchToMBytes"/>
@@ -114,6 +116,21 @@
    </property>
    <property name="text">
     <string>Switch to MBytes</string>
+   </property>
+  </action>
+  <action name="actionSaveSnapshot">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/save.png</normaloff>:/icons/resources/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save snapshot</string>
+   </property>
+   <property name="toolTip">
+    <string>Save results to database</string>
    </property>
   </action>
  </widget>

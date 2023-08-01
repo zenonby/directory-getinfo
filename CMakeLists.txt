@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
         utils.h
         settings.cpp
         settings.h
+        ProgressDlg.cpp
+        ProgressDlg.h
         model/DirectoryStore.cpp
         model/DirectoryStore.h
         model/DirectoryDetails.h

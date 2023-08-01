@@ -1,4 +1,4 @@
-#include <future>
+#include <functional>
 #include <QDebug>
 #include <QMessageBox>
 
@@ -14,7 +14,9 @@
 #define DIVISOR_VALUE_KB "KB"
 #define DIVISOR_VALUE_MB "MB"
 
-GetInfo::GetInfo(QWidget *parent)
+using namespace std::placeholders;
+
+GetInfo::GetInfo(QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::GetInfo)
 {
@@ -38,6 +40,8 @@ GetInfo::GetInfo(QWidget *parent)
     connect(ui->actionSwitchToBytes, SIGNAL(triggered()), this, SLOT(switchToBytes()));
     connect(ui->actionSwitchToKBytes, SIGNAL(triggered()), this, SLOT(switchToKBytes()));
     connect(ui->actionSwitchToMBytes, SIGNAL(triggered()), this, SLOT(switchToMBytes()));
+
+    connect(ui->actionSaveSnapshot, SIGNAL(triggered()), this, SLOT(startSavingSnapshot()));
 
     DirectoryScanner::instance()->subscribe(this);
 }
@@ -112,25 +116,28 @@ GetInfo::switchToMBytes()
 void
 GetInfo::onUpdateDirectoryInfo(KDirectoryInfoPtr pInfo)
 {
-    QMetaObject::invokeMethod(
+    bool res = QMetaObject::invokeMethod(
         this, "updateDirectoryInfo", Qt::QueuedConnection,
         Q_ARG(KDirectoryInfoPtr, pInfo));
+    assert(res);
 }
 
 void
 GetInfo::onUpdateMimeSizes(KMimeSizesInfoPtr pInfo)
 {
-    QMetaObject::invokeMethod(
+    bool res = QMetaObject::invokeMethod(
         this, "updateMimeSizes", Qt::QueuedConnection,
         Q_ARG(KMimeSizesInfoPtr, pInfo));
+    assert(res);
 }
 
 void
 GetInfo::onWorkerException(std::exception_ptr&& pEx)
 {
-    QMetaObject::invokeMethod(
+    bool res = QMetaObject::invokeMethod(
         this, "workerException", Qt::QueuedConnection,
         Q_ARG(std::exception_ptr, pEx));
+    assert(res);
 }
 
 void
@@ -223,4 +230,43 @@ GetInfo::writeSettings()
         settings->setValue(DIVISOR_NAME, DIVISOR_VALUE_MB);
     else
         assert(!"Unexpected divisor selection");
+}
+
+void
+GetInfo::startSavingSnapshot()
+{
+    assert(!m_progressDlg);
+    m_progressDlg = std::make_unique<ProgressDlg>(this,
+        tr("Save results to database"),
+        tr("Please wait..."),
+        std::bind(&GetInfo::saveSnapshot, this),
+        std::bind(&GetInfo::onCompleteSavingSnapshot, this, _1),
+        nullptr);
+}
+
+void
+GetInfo::onCompleteSavingSnapshot(std::future<void>&& futComplete)
+{
+    // Handle possible exceptions from the wroker thread
+    try
+    {
+        futComplete.get();
+    }
+    catch (const std::exception& ex)
+    {
+        QMessageBox::critical(this, tr("Error"), ex.what());
+    }
+    catch (...)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Unexpected error"));
+    }
+
+    // Delete after handling future
+    m_progressDlg.reset();
+}
+
+void
+GetInfo::saveSnapshot()
+{
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 }
