@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 SET(CMAKE_DEBUG_POSTFIX "d")
@@ -81,7 +81,7 @@ else()
 endif()
 
 target_link_libraries(GetInfo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets sqlite3)
-# target_link_libraries(sqlite3d -static)
+target_include_directories(GetInfo PRIVATE libs/sqlite3)
 
 set_target_properties(GetInfo PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

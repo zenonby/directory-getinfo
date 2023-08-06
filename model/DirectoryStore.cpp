@@ -1,31 +1,17 @@
-#include <filesystem>
+#include <SqliteDb.h>
 #include "DirectoryStore.h"
 #include "utils.h"
 #include "settings.h"
 
+#define SQL_TABLE_SNAPSHOTS L"snapshots"
+#define SQL_TABLE_DIRECTORIES L"directories"
+
 DirectoryStore::DirectoryStore()
-	: m_db(nullptr)
 {
-	const auto& dbFileName = Settings::instance()->dbFileName();
-    const auto& dbDir = getDirectoryFromFilePath(dbFileName);
-
-    // Create directory for DB file if the dir does not exist
-    std::error_code err;
-    if (!std::filesystem::exists(dbDir) &&
-        !std::filesystem::create_directories(dbDir, err))
-    {
-        throw std::logic_error(err.message());
-    }
-
-	auto rc = sqlite3_open(dbFileName.c_str(), &m_db);
-	if (rc)
-		throw std::logic_error(sqlite3_errmsg(m_db));
 }
 
 DirectoryStore::~DirectoryStore()
 {
-	sqlite3_close(m_db);
-	m_db = nullptr;
 }
 
 DirectoryStore*
@@ -82,4 +68,107 @@ DirectoryStore::tryGetDirectory(
 
 	directoryDetails = dirDetails.clone(ready || !fillinMimeSizesOnlyIfReady);
 	return true;
+}
+
+std::wstring
+DirectoryStore::getDbFileName() const
+{
+	const auto& dbFileName = Settings::instance()->dbFileName();
+	return dbFileName;
+}
+
+void
+DirectoryStore::checkCreateDbSchema()
+{
+	const auto& dbFileName = getDbFileName();
+	SqliteDb db(dbFileName);
+
+	const auto sqlCheckTable = L"SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?";
+
+	// snapshots table
+	auto rs1 = db
+		.prepare(sqlCheckTable)
+		.addParameter(SQL_TABLE_SNAPSHOTS)
+		.select();
+
+	int rowCount = rs1.getInt(0).value();
+	if (0 == rowCount)
+	{
+		db.execute(L"CREATE TABLE " SQL_TABLE_SNAPSHOTS L" (\n"
+			L"id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+			L"date_time TEXT NOT NULL\n"
+			L")");
+	}
+
+	// directories table
+	auto rs2 = db
+		.prepare(sqlCheckTable)
+		.addParameter(SQL_TABLE_DIRECTORIES)
+		.select();
+
+	rowCount = rs2.getInt(0).value();
+	if (0 == rowCount)
+	{
+		db.execute(L"CREATE TABLE " SQL_TABLE_DIRECTORIES L" (\n"
+			L"id INTEGER PRIMARY KEY,\n"
+			L"snapshot_id INTEGER NOT NULL,\n"
+			L"path TEXT NOT NULL,\n"
+			L"total_size INTEGER NOT NULL,\n"
+			L"FOREIGN KEY (snapshot_id) REFERENCES " SQL_TABLE_SNAPSHOTS L"(id)\n"
+			L")");
+	}
+}
+
+void
+DirectoryStore::saveCurrentData()
+{
+	std::scoped_lock lock_(m_sync);
+
+	const auto& dbFileName = getDbFileName();
+	SqliteDb db(dbFileName);
+	auto transaction = db.beginTransaction();
+
+	try
+	{
+		// Create new snapshot
+		auto rs = db.prepare(
+			L"INSERT INTO " SQL_TABLE_SNAPSHOTS L" (date_time) VALUES (?); "
+			L"SELECT MAX(last_insert_rowid()) FROM " SQL_TABLE_SNAPSHOTS)
+			.addParameter(std::chrono::utc_clock::now())
+			.select();
+
+		// Get snapshot id
+		const int snapshotId = rs.getInt(0).value();
+
+		const auto sqlInsertDir =
+			L"INSERT INTO " SQL_TABLE_DIRECTORIES L" (snapshot_id, path, total_size) "
+			L"VALUES (?, ?, ?)";
+
+		// Add directory data
+		for (auto iter = m_directories.cbegin(); iter != m_directories.cend(); ++iter)
+		{
+			const auto& unifiedPath = iter->first;
+			const auto& dirDetails = iter->second;
+
+			if (!dirDetails.mimeDetailsList.has_value())
+				continue;
+
+			// Get details
+			auto mimeDetailsList = dirDetails.mimeDetailsList.value();
+			auto mimeDetails = mimeDetailsList[TMimeDetailsList::ALL_MIMETYPE];
+
+			db.prepare(sqlInsertDir)
+				.addParameter(snapshotId)
+				.addParameter(unifiedPath.toStdWString())
+				.addParameter(static_cast<long long>(mimeDetails.totalSize))
+				.execute();
+		}
+
+		transaction.commit();
+	}
+	catch (...)
+	{
+		transaction.rollback();
+		throw;
+	}
 }

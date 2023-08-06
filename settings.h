@@ -17,7 +17,7 @@ public:
 
 	// Directory where ini file, DB file and other possible files are stored
 	const QString& directory() const;
-	const std::string& dbFileName() const;
+	const std::wstring& dbFileName() const;
 
 	void setValue(const QString& key, const QVariant& value);
 	QVariant value(const QString& key, const QVariant& defaultValue = QVariant()) const;
@@ -34,7 +34,7 @@ private:
 	mutable std::mutex m_sync;
 
 	QString m_settingsDirectory;
-	std::string m_dbFileName;
+	std::wstring m_dbFileName;
 
 	static QString getArraySizeValueName(const QString& prefix);
 };

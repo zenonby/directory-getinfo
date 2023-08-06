@@ -16,8 +16,7 @@ public:
         const QString& windowTitle,
         const QString& labelText,
         TCallback worker,
-        TCallback onComplete,
-        TCallback onCancel);
+        TCallback onComplete);
 
 private:
     QWidget* m_parent;
@@ -27,7 +26,6 @@ private:
     // Callbacks
     TCallback m_worker;
     TCallback m_onComplete;
-    TCallback m_onCancel;
 
     typedef std::unique_ptr<QProgressDialog> TProgressDialogPtr;
     TProgressDialogPtr m_progressDlg;

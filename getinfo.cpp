@@ -5,6 +5,7 @@
 #include "getinfo.h"
 #include "./ui_getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
+#include "model/DirectoryStore.h"
 #include "utils.h"
 #include "settings.h"
 
@@ -240,19 +241,18 @@ GetInfo::startSavingSnapshot()
         tr("Save results to database"),
         tr("Please wait..."),
         std::bind(&GetInfo::saveSnapshot, this),
-        std::bind(&GetInfo::onCompleteSavingSnapshot, this),
-        nullptr);
+        std::bind(&GetInfo::onCompleteSavingSnapshot, this));
 }
 
 void
 GetInfo::onCompleteSavingSnapshot()
 {
-    // Delete after handling future
     m_progressDlg.reset();
 }
 
 void
 GetInfo::saveSnapshot()
 {
+    DirectoryStore::instance()->saveCurrentData();
     std::this_thread::sleep_for(std::chrono::seconds(3));
 }

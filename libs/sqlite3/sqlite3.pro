@@ -10,10 +10,18 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    sqlite3.c
+    amalgamation/sqlite3.c \
+    SqliteDb.cpp \
+    SqliteRecordset.cpp \
+    SqliteCommand.cpp \
+    SqliteTransaction.cpp
 
 HEADERS += \
-    sqlite3.h
+    amalgamation/sqlite3.h \
+    SqliteDb.h \
+    SqliteRecordset.h \
+    SqliteCommand.h \
+    SqliteTransaction.h
 
 DESTDIR = $$PWD
 

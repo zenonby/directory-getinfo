@@ -5,8 +5,6 @@
 #include <map>
 #include <QString>
 
-#include "libs/sqlite3/sqlite3.h"
-
 #include "DirectoryDetails.h"
 
 class DirectoryStore
@@ -29,6 +27,11 @@ public:
 		bool fillinMimeSizesOnlyIfReady,
 		DirectoryDetails& directoryDetails);
 
+	/// <summary>
+	/// Saves current data (m_directories) to database
+	/// </summary>
+	void saveCurrentData();
+
 private:
 	DirectoryStore();
 	DirectoryStore(const DirectoryStore&) = delete;
@@ -41,7 +44,9 @@ private:
 		DirectoryDetails
 	> m_directories;
 
-	sqlite3* m_db;
+	std::wstring getDbFileName() const;
+
+	void checkCreateDbSchema();
 };
 
 #endif // DIRECTORYSTORE_H

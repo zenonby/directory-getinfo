@@ -57,14 +57,3 @@ getImmediateParent(const QString unifiedPath)
 
 	return parentPath;
 }
-
-std::string
-getDirectoryFromFilePath(const std::string& filePath)
-{
-    auto slashPos = filePath.find_last_of("/\\");
-    if (std::string::npos == slashPos)
-        return "";
-
-    std::string dir = filePath.substr(0, slashPos);
-    return dir;
-}

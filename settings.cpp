@@ -18,7 +18,7 @@ Settings::Settings()
 	m_settingsDirectory = fi.absolutePath();
 	m_dbFileName = QDir(m_settingsDirectory)
 		.filePath(QCoreApplication::applicationName() + ".db")
-		.toStdString();
+		.toStdWString();
 }
 
 Settings*
@@ -41,7 +41,7 @@ Settings::directory() const
 	return m_settingsDirectory;
 }
 
-const std::string&
+const std::wstring&
 Settings::dbFileName() const
 {
 	return m_dbFileName;

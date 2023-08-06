@@ -149,7 +149,7 @@ DirectoryScanner::requestCancellationAndWait(std::unique_lock<std::mutex>& lock_
 {
     auto resetCancellationRequest = scope_guard([&](auto) {
         m_isCancellationRequested = false;
-        });
+    });
 
     // Дождаться завершения выполнения scanDirectory перед манипуляциями со стеком задач
     m_isCancellationRequested = true;

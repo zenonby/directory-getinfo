@@ -5,14 +5,12 @@ ProgressDlg::ProgressDlg(QWidget* parent,
     const QString& windowTitle,
     const QString& labelText,
     TCallback worker,
-    TCallback onComplete,
-    TCallback onCancel)
+    TCallback onComplete)
     : m_parent(parent),
       m_windowTitle(windowTitle),
       m_labelText(labelText),
       m_worker(worker),
-      m_onComplete(onComplete),
-      m_onCancel(onCancel)
+      m_onComplete(onComplete)
 {
     assert(!!m_worker);
     assert(!!m_onComplete);
@@ -47,9 +45,8 @@ ProgressDlg::start()
     m_progressDlg->setWindowTitle(tr("Save results to database"));
     m_progressDlg->setRange(0, 100);
 
-    // Disable [Cancel] button if onCancel handler is not specified
-    if (!m_onCancel)
-        m_progressDlg->setCancelButton(nullptr);
+    // Disable [Cancel] button
+    m_progressDlg->setCancelButton(nullptr);
 
     // Disable native 'close window' button ([X])
     m_progressDlg->setWindowFlags(

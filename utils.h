@@ -16,8 +16,6 @@ bool isParentPath(const QString& childUnifiedPath, const QString& parentUnifiedP
 // Immediate parent directory or null if no parent
 QString getImmediateParent(const QString unifiedPath);
 
-std::string getDirectoryFromFilePath(const std::string& filePath);
-
 template<class TFunc>
 auto scope_guard(TFunc&& func) {
     return std::unique_ptr<void, typename std::decay<TFunc>::type>{reinterpret_cast<void*>(1), std::forward<TFunc>(func)};
