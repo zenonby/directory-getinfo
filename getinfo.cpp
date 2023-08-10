@@ -254,5 +254,4 @@ void
 GetInfo::saveSnapshot()
 {
     DirectoryStore::instance()->saveCurrentData();
-    std::this_thread::sleep_for(std::chrono::seconds(3));
 }

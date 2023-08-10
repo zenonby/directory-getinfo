@@ -119,6 +119,14 @@ DirectoryStore::checkCreateDbSchema()
 	}
 }
 
+bool
+DirectoryStore::hasData() const
+{
+	std::scoped_lock lock_(m_sync);
+	bool res = !m_directories.empty();
+	return res;
+}
+
 void
 DirectoryStore::saveCurrentData()
 {

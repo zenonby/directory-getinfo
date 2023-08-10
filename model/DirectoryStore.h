@@ -27,6 +27,9 @@ public:
 		bool fillinMimeSizesOnlyIfReady,
 		DirectoryDetails& directoryDetails);
 
+	// Returns true if any data (at least for 1 dir) are present
+	bool hasData() const;
+
 	/// <summary>
 	/// Saves current data (m_directories) to database
 	/// </summary>
