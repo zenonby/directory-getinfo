@@ -47,4 +47,14 @@ public:
 		: std::logic_error("Statement already finished") { }
 };
 
+/**
+ * Attempt to execute multiple statements at once
+ */
+class MultipleStatementsUnsupportedError : std::logic_error
+{
+public:
+	explicit MultipleStatementsUnsupportedError()
+		: std::logic_error("Multiple statements not supported") { }
+};
+
 #endif // SqliteErrorS_H

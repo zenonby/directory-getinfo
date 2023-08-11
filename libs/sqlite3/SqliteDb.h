@@ -5,6 +5,7 @@
 #include "SqliteRecordset.h"
 #include "SqliteCommand.h"
 #include "SqliteTransaction.h"
+#include "SqliteExceptions.h"
 
 struct sqlite3;
 

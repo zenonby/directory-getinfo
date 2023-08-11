@@ -11,8 +11,14 @@ SqliteCommand::SqliteCommand(sqlite3* db, const std::wstring& sql)
 {
 	assert(m_db);
 
-	const void* wszTail = nullptr;
-	auto res = sqlite3_prepare16_v2(m_db, sql.c_str(), -1, &m_preparedStmt, &wszTail);
+	const void* pTail = nullptr;
+	auto res = sqlite3_prepare16_v2(m_db, sql.c_str(), -1, &m_preparedStmt, &pTail);
+
+	// Check that no statements left unprocessed
+	auto wszTail = reinterpret_cast<const wchar_t* const>(pTail);
+	if (nullptr != wszTail && L'\0' != *wszTail)
+		throw MultipleStatementsUnsupportedError();
+
 	if (SQLITE_OK != res)
 		throw SqliteError(sqlite3_errmsg(m_db));
 }

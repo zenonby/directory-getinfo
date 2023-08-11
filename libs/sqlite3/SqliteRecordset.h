@@ -30,7 +30,7 @@ public:
 	typedef std::chrono::time_point<std::chrono::utc_clock> TDateTime;
 
 	// Checks if more records are available
-	bool operator()() const;
+	operator bool() const;
 
 	// Moves to the next record;
 	SqliteRecordset& operator++();

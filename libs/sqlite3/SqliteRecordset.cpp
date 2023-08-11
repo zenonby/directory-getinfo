@@ -20,8 +20,7 @@ SqliteRecordset::~SqliteRecordset()
 	}
 }
 
-bool
-SqliteRecordset::operator()() const
+SqliteRecordset::operator bool() const
 {
 	return m_valid;
 }
@@ -30,7 +29,7 @@ SqliteRecordset&
 SqliteRecordset::operator++()
 {
 	auto res = sqlite3_step(m_preparedStmt);
-	assert(SQLITE_BUSY != res && SQLITE_LOCKED != res && !"SQLITE_BUSY, SQLITE_LOCKED are not handled since concurent access is not supported");
+	assert(SQLITE_BUSY != res && SQLITE_LOCKED != res && "SQLITE_BUSY, SQLITE_LOCKED are not handled since concurent access is not supported");
 	assert(SQLITE_ROW == res || SQLITE_DONE == res);
 
 	m_valid = SQLITE_ROW == res;
@@ -134,7 +133,7 @@ SqliteRecordset::getBlob(int index) const
 
 	if (SQLITE_NULL == type)
 		return std::optional<std::vector<unsigned char>>();
-	else if (SQLITE_TEXT != type)
+	else if (SQLITE_BLOB != type)
 		throw SqliteInvalidTypeError();
 
 	auto bufSize = sqlite3_column_bytes(m_preparedStmt, index);
