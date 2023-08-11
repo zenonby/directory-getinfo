@@ -70,6 +70,9 @@ private slots:
 
     // Saves scan results to DB
     void startSavingSnapshot();
+
+    // Starts scanning all directories
+    void scanAllDirectories();
 };
 
 #endif // GETINFO_H

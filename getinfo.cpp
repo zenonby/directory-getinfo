@@ -43,6 +43,7 @@ GetInfo::GetInfo(QWidget* parent)
     connect(ui->actionSwitchToMBytes, SIGNAL(triggered()), this, SLOT(switchToMBytes()));
 
     connect(ui->actionSaveSnapshot, SIGNAL(triggered()), this, SLOT(startSavingSnapshot()));
+    connect(ui->actionScanAll, SIGNAL(triggered()), this, SLOT(scanAllDirectories()));
 
     DirectoryScanner::instance()->subscribe(this);
 }
@@ -254,4 +255,10 @@ void
 GetInfo::saveSnapshot()
 {
     DirectoryStore::instance()->saveCurrentData();
+}
+
+void
+GetInfo::scanAllDirectories()
+{
+assert(!"TO DO");
 }

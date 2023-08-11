@@ -76,6 +76,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionScanAll"/>
    <addaction name="actionSaveSnapshot"/>
    <addaction name="separator"/>
    <addaction name="actionSwitchToBytes"/>
@@ -131,6 +132,18 @@
    </property>
    <property name="toolTip">
     <string>Save results to database</string>
+   </property>
+  </action>
+  <action name="actionScanAll">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/scan_all.png</normaloff>:/icons/resources/scan_all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Scan All</string>
+   </property>
+   <property name="toolTip">
+    <string>Scan all directories</string>
    </property>
   </action>
  </widget>
