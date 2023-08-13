@@ -9,7 +9,7 @@ Ubuntu builds:
 ```
 	sudo apt install libxcb-xinerama0
 ```
-* In case of missing libgl (_Cannot find -lGL: No such file ot directory_) while running the project install corresponding dev package:
+* In case of missing libgl (_Cannot find -lGL: No such file ot directory_) while running the project, install corresponding dev package:
 ```
 	sudo apt install libgl-dev
 ```
