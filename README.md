@@ -1,4 +1,6 @@
 ﻿# directory-getinfo
+## Description
+Qt-based GUI program for getting information about directories, specifically how much space is occupied by each file type within those directories.
 
 ## Submodules
 Before building the code checkout submodules:
