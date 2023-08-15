@@ -5,8 +5,8 @@
 #include <QString>
 #include <QList>
 
-// Суммарный и средний размер файлов определенного типа.
-// Запись в KMimeSizesModel.
+// Information (total, average file size, etc) related to a particular MIME type
+// A record in KMimeSizesModel.
 struct KMimeSize
 {
     QString mimeType;
@@ -19,7 +19,7 @@ struct KMimeSizesInfo
 {
     typedef QList<KMimeSize> KMimeSizesList;
 
-    // Полный путь директории
+    // Directory full (unified) path
     QString fullPath;
 
     KMimeSizesList mimeSizes;

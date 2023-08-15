@@ -37,10 +37,10 @@ private:
 
     Ui::GetInfo *ui;
 
-    // Унифицированный путь текущей выбранной директории
+    // Unified path of currently selected path
     QString m_unifiedSelectedPath;
 
-    // Модели для view
+    // Models for views
     KFileSystemModel m_fsModel;
     KMimeSizesModel m_msModel;
 

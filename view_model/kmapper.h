@@ -4,7 +4,7 @@
 #include "model/MimeDetails.h"
 #include "dir_scanner/KMimeSizesInfo.h"
 
-// Отображает сущности модели на DTO view-model
+// Maps model entities to DTO view-model
 struct KMapper
 {
 	static void mapTMimeDetailsListToKMimeSizesList(

@@ -10,6 +10,7 @@ struct MimeDetails
     unsigned long fileCount = 0;
 };
 
+// MIME is kinb of misused and actually stands for file extension
 struct TMimeDetailsList : std::map<
     QString,    // Mime type
     MimeDetails>

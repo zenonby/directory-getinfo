@@ -5,7 +5,7 @@
 
 #include "dir_scanner/KDirectoryInfo.h"
 
-// Модель для дерева директорий
+// Directory tree model
 class KFileSystemModel : public QFileSystemModel
 {
 	Q_OBJECT
@@ -29,7 +29,7 @@ public:
 
 private:
 	std::map<
-		QString, // Перед вставкой привести к общему виду посредством getUnifiedPathName
+		QString, // N.B. __Unified__ path. Translate to unified path before insertion !
 		KDirectoryData
 	> m_dirData;
 

@@ -3,6 +3,7 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++20
+QMAKE_CXXFLAGS += -std=c++2a
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -43,7 +44,7 @@ HEADERS += \
     dir_scanner/KMimeSizesInfo.h \
 
 LIBS += \
-    -L$$PWD/libs/sqlite3 -lsqlite3
+    -L$$PWD/libs/yasw -lyasw
 
 FORMS += \
     getinfo.ui

@@ -8,7 +8,7 @@ KMapper::mapTMimeDetailsListToKMimeSizesList(
 {
     mimeSizes.reserve(static_cast<int>(mimeDetailsList.size()));
 
-    // Отобразить mimeDetailsList в элементы mimeSizes
+    // Map mimeDetailsList to mimeSizes elements
     std::transform(mimeDetailsList.cbegin(), mimeDetailsList.cend(),
         std::back_inserter(mimeSizes), [](auto iter) {
             KMimeSize rv;
@@ -23,7 +23,7 @@ KMapper::mapTMimeDetailsListToKMimeSizesList(
             return rv;
         });
 
-    // Перенести TMimeDetailsList::ALL_MIMETYPE в начало
+    // Move TMimeDetailsList::ALL_MIMETYPE to the very beginning
     for (auto iter = mimeSizes.begin(); iter != mimeSizes.end(); ++iter)
     {
         const auto mimeSize = *iter;

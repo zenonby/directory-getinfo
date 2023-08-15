@@ -5,18 +5,18 @@
 
 #include "dir_scanner/KMimeSizesInfo.h"
 
-// Модель для таблицы с размерами по типам файлов
+// Model for a table of MIME type total sizes
 class KMimeSizesModel : public QAbstractListModel
 {
 public:
     enum { NumColumns = 4 };
 
-    // Округление размеров файлов
+    // File size rounding
     enum class FileSizeDivisor
     {
-        Bytes = 0,
-        KBytes,
-        MBytes
+        Bytes = 0, // Round to bytes
+        KBytes,    // Round to KBytes
+        MBytes     // Round to MBytes
     };
 
     void setFileSizeDivisor(FileSizeDivisor divisor);
@@ -30,7 +30,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
-    // Устанавливает новые значения, перенося посредством swap
+    // Sets new values by transferring via swap
     void setMimeSizes(KMimeSizesInfo::KMimeSizesList&& values);
 
 private:

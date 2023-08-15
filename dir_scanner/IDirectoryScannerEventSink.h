@@ -4,7 +4,7 @@
 #include "KDirectoryInfo.h"
 #include "KMimeSizesInfo.h"
 
-// Потребитель сообщений о сканировании директорий
+// Data scanning event subscribers/sinks
 struct IDirectoryScannerEventSink
 {
 	virtual ~IDirectoryScannerEventSink() = default;

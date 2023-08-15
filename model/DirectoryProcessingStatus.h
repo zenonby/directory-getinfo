@@ -1,7 +1,7 @@
 #ifndef DIRECTORYPROCESSINGSTATUS_H
 #define DIRECTORYPROCESSINGSTATUS_H
 
-// Статусы обработки директорий
+// Directory scan status
 enum class DirectoryProcessingStatus
 {
 	Pending = 0,

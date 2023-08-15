@@ -8,10 +8,10 @@
 
 #include "model/DirectoryDetails.h"
 
-// Состояние сканирования
+// Scan state
 struct WorkState
 {
-	// Унифицированный путь
+	// Unified path
 	QString	fullPath;
 
 	std::shared_ptr<std::filesystem::directory_iterator> pDirIterator;
@@ -28,33 +28,33 @@ public:
 	const WorkState& top() const noexcept;
 	WorkState& top() noexcept;
 
-	// unifiedPath - унифицированный путь
+	// unifiedPath - unified path
 	void setFocusedPath(const QString& unifiedPath);
 
 	bool isAboveFocusedPath(const QString& unifiedPath) const noexcept;
 
-	// Добавляет рабочее задание на стек
+	// Pushes a work task on the work stack
 	void pushScanDirectory(const WorkState& workState);
 
-	// Удаляет задание из стека
+	// Removes a task from the work stack
 	void popScanDirectory(DirectoryProcessingStatus status);
 
-	// Удалет уже завершенную задачу из стека при попытке повторного вызова
+	// Pops already finished task from the stack in case of subsequent attempt to execute
 	void popReadyScanDirectory();
 
 	// Removes disabled scan directory from the stack
 	void popDisabledScanDirectory();
 
-	// Переносит данные завершенной задачи в родительскую (суммрует)
+	// Cumulatively transfers (adds) results of a finished task to a parrent task
 	void copyReadyScanDirectoryDataToParent(const WorkState& workState);
 
-	// Удалет задачу, вызвавшую исключение из стека
+	// pops a task which caused an error from the work stack
 	void popErrorScanDirectory(const QString& workDirPath);
 
 private:
 	std::stack<WorkState> m_scanDirectories;
 
-	// Установленный фокус скана
+	// Focused (from UI) scan path
 	QString m_focusedParentPath;
 };
 

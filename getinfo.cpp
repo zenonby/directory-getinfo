@@ -60,7 +60,7 @@ void
 GetInfo::treeDirectoriesSelectionChanged(
     const QItemSelection& selected, const QItemSelection& deselected)
 {
-    // Сбросить размеры файлов по типам
+    // Reset MIME type total sizes
     m_msModel.setMimeSizes(KMimeSizesInfo::KMimeSizesList());
 
     auto selectedindexes = selected.indexes();
@@ -155,7 +155,7 @@ GetInfo::updateMimeSizes(KMimeSizesInfoPtr pInfo)
 {
     assert(!!ui);
 
-    // Обновленная директория
+    // Updated directory
     QString updatedPath = getUnifiedPathName(pInfo->fullPath);
 
     if (m_unifiedSelectedPath == updatedPath)

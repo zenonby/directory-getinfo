@@ -6,20 +6,20 @@
 #include <QString>
 #include "model/DirectoryProcessingStatus.h"
 
-// Данные, ассоциированные с директорией без имени последней
+// Directory data without a directory path
 struct KDirectoryData
 {
-	// Статус сканирования директории
+	// Directory scanning status
 	DirectoryProcessingStatus status = DirectoryProcessingStatus::Pending;
 
-	// Кол-во непосредственных поддиректорий
+	// Immediate subdirectory count
 	std::optional<unsigned long> subDirCount = 0;
 };
 
-// Информация об отдельном узле дерева
+// Directory tree item
 struct KDirectoryInfo : KDirectoryData
 {
-	// Полный путь директории
+	// Unified directory path
 	QString fullPath;
 };
 

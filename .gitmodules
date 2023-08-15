@@ -1,0 +1,3 @@
+[submodule "libs/yasw"]
+	path = libs/yasw
+	url = https://github.com/zenonby/yasw.git

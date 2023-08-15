@@ -25,7 +25,7 @@ WorkStack::setFocusedPath(const QString& unifiedPath)
 {
     assert(isUnifiedPath(unifiedPath));
 
-    // Сам путь не нужен, достаточно родительского пути
+    // The path itself is not required, just a parent path
     m_focusedParentPath = getImmediateParent(unifiedPath);
 }
 
@@ -46,13 +46,13 @@ WorkStack::pushScanDirectory(const WorkState& workState)
     m_scanDirectories.push(workState);
 
     //
-    // Проверить статус задачи и при необходимости обновить
+    // Check task status and update if needed
     //
 
     DirectoryDetails dirDetails;
     bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, false, dirDetails);
 
-    // Обновить значения в стеке о возможно прерванном сканировании
+    // Update values in the stack about possibly cancelled scan
     if (res)
     {
         auto& workState_ = m_scanDirectories.top();
@@ -64,7 +64,7 @@ WorkStack::pushScanDirectory(const WorkState& workState)
             workState_.mimeSizes = dirDetails.mimeDetailsList.value();
     }
 
-    // Обновить статус
+    // Update status
     if (!m_focusedParentPath.startsWith(workDirPath) &&
         (!res ||
             (DirectoryProcessingStatus::Ready != dirDetails.status &&
@@ -82,7 +82,7 @@ WorkStack::popScanDirectory(DirectoryProcessingStatus status)
 {
     auto workState = m_scanDirectories.top();
 
-    // Обновить статус задачи
+    // Update task status
     DirectoryDetails dirDetails;
     dirDetails.status = status;
 
@@ -96,7 +96,8 @@ WorkStack::popScanDirectory(DirectoryProcessingStatus status)
 
     m_scanDirectories.pop();
 
-    // В случае успешного завершения добавить значения к родительской директории
+    // In case of successful completion add values (scan results)
+    //  of this directory to the parent directory
     if (DirectoryProcessingStatus::Ready == status)
     {
         copyReadyScanDirectoryDataToParent(workState);
@@ -135,11 +136,11 @@ WorkStack::popDisabledScanDirectory()
 void
 WorkStack::popErrorScanDirectory(const QString& workDirPath)
 {
-    // Убрать из стека потенциально добавленные туда дочерние директории
+    // Remove from the stack child directories that could be probably added
     while (workDirPath != m_scanDirectories.top().fullPath)
         popScanDirectory(DirectoryProcessingStatus::Error);
 
-    // Убрать саму директорию
+    // Remove the directory itself
     assert(!m_scanDirectories.empty() && workDirPath == m_scanDirectories.top().fullPath);
     popScanDirectory(DirectoryProcessingStatus::Error);
 }
@@ -149,18 +150,18 @@ WorkStack::copyReadyScanDirectoryDataToParent(const WorkState& workState)
 {
     const auto& workDirPath = workState.fullPath;
 
-    // В рабочем стеке
+    // In the work stack
     if (!m_scanDirectories.empty())
     {
         auto& parentWorkState = m_scanDirectories.top();
         parentWorkState.mimeSizes.addMimeDetails(workState.mimeSizes);
 
-        // Также продвинуть вперед итератор
+        // Also move forward the iterator
         if (!!parentWorkState.pDirIterator)
             (*parentWorkState.pDirIterator)++;
     }
 
-    // В базе
+    // Update the data store
     const auto& parentDirPath = getImmediateParent(workDirPath);
     if (!parentDirPath.isEmpty())
     {

@@ -22,7 +22,7 @@ main(int argc, char *argv[])
         qRegisterMetaType<KDirectoryInfoPtr>("KDirectoryInfoPtr");
         qRegisterMetaType<KMimeSizesInfoPtr>("KMimeSizesInfoPtr");
 
-        // Вызвать все dtor
+        // Call all dtor-s
         {
             QApplication a(argc, argv);
             GetInfo w;

@@ -28,7 +28,7 @@ isParentPath(const QString& childUnifiedPath, const QString& parentUnifiedPath)
 	assert(isUnifiedPath(childUnifiedPath));
 	assert(isUnifiedPath(parentUnifiedPath));
 
-	// Избежать случая "C:/Program Files (x86)" и "C:/Program Files"
+	// Avoid "C:/Program Files (x86)" and "C:/Program Files" cases
 	const auto& parentPath = getImmediateParent(childUnifiedPath);
 
 	bool res = parentPath.startsWith(parentUnifiedPath);
@@ -47,7 +47,7 @@ getImmediateParent(const QString unifiedPath)
 	{
 		int pos = unifiedPath.lastIndexOf('/', unifiedPath[len - 1] == '/' ? (len - 2) : -1);
 		if (0 <= pos)
-			parentPath = unifiedPath.left(pos + 1); // Включая slash
+			parentPath = unifiedPath.left(pos + 1); // Including slash
 
 		parentPath = getUnifiedPathName(parentPath);
 	}

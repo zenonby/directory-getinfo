@@ -59,7 +59,7 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 	{
 		QVariant val;
 
-		// Найти данные о директории, если были обновлены ранее
+		// Lookup directory data if they were updated before
 		auto dirData = lookupDirectoryData(filePath(index));
 
 		switch (columnIndex)
@@ -81,7 +81,7 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 	}
 	else
 	{
-		// Базовая реализация
+		// Base implementation
 		return QFileSystemModel::data(index, role);
 	}
 }
@@ -113,7 +113,7 @@ KFileSystemModel::headerData(int section, Qt::Orientation orientation, int role)
 	}
 	else
 	{
-		// Базовая реализация
+		// Base implementation
 		return QFileSystemModel::headerData(section, orientation, role);
 	}
 }
@@ -142,7 +142,7 @@ KFileSystemModel::setDirectoryChecked(const QModelIndex& index_, bool checked)
 	if (!index_.isValid())
 		return;
 
-	// Найти данные о директории, если были обновлены ранее
+	// Lookup directory data if they were updated before
 	const auto& fullPath = getUnifiedPathName(filePath(index_));
 	DirectoryScanSwitch::instance()->setEnabled(fullPath, checked);
 
@@ -209,13 +209,13 @@ KFileSystemModel::translateDirectoryProcessingStatus(DirectoryProcessingStatus s
 const KDirectoryData*
 KFileSystemModel::lookupDirectoryData(const QString& path) const
 {
-	// Привести путь к общему виду
+	// Translate path to a unified one
 	const QString& fullPath = getUnifiedPathName(path);
 
-	// Найти данные о директории
+	// Lookup directory data
 	auto iter = m_dirData.find(fullPath);
 
-	// Найти данные о директории, если были обновлены ранее
+	// Lookup directory data if they were update before
 	const KDirectoryData* dirData = nullptr;
 	if (iter != m_dirData.end())
 		dirData = &iter->second;
@@ -226,13 +226,13 @@ KFileSystemModel::lookupDirectoryData(const QString& path) const
 KDirectoryData*
 KFileSystemModel::lookupDirectoryData(const QString& path)
 {
-	// Привести путь к общему виду
+	// Translate path to a unified one
 	const QString& fullPath = getUnifiedPathName(path);
 
-	// Найти данные о директории
+	// Lookup directory data
 	auto iter = m_dirData.find(fullPath);
 
-	// Найти данные о директории, если были обновлены ранее
+	// Lookup directory data if they were update before
 	KDirectoryData* dirData = nullptr;
 	if (iter != m_dirData.end())
 		dirData = &iter->second;
@@ -247,7 +247,7 @@ KFileSystemModel::updateDirectoryData(const QString& unifiedPath, KDirectoryData
 
 	auto oldDirData = lookupDirectoryData(unifiedPath);
 
-	// Обновить данные о директории
+	// Update directory data
 	if (nullptr != oldDirData)
 		*oldDirData = std::move(dirData);
 	else

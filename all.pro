@@ -2,9 +2,9 @@ TEMPLATE = subdirs
 
 SUBDIRS = \
         GetInfo \
-        sqlite3
+        yasw
 
-sqlite3.subdir = libs/sqlite3
+yasw.subdir = libs/yasw
 GetInfo.file = GetInfo.pro
 
-GetInfo.depends = sqlite3
+GetInfo.depends = yasw

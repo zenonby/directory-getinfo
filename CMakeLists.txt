@@ -19,8 +19,8 @@ set (CMAKE_PREFIX_PATH "$ENV{QT_DIR}\\${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
-# Build sqlite3 library
-add_subdirectory(libs/sqlite3)
+# Build yasw library
+add_subdirectory(libs/yasw)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -80,8 +80,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets sqlite3)
-target_include_directories(${PROJECT_NAME} PRIVATE libs/sqlite3)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets yasw)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/yasw/include)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

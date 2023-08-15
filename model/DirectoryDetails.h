@@ -6,6 +6,7 @@
 #include "DirectoryProcessingStatus.h"
 #include "MimeDetails.h"
 
+// Information, collected about a particular directory
 struct DirectoryDetails
 {
 	DirectoryProcessingStatus status;

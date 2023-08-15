@@ -14,14 +14,14 @@ public:
 
 	static DirectoryStore* instance();
 
-	// Неуказанные в dirDetails значения (optional) не будут обновлены или удалены
+	// Unspecified members of dirDetails (optional) are not updated or deleted
 	void upsertDirectory(
 		const QString& unifiedPath,
 		const DirectoryDetails& dirDetails);
 
-	// Если fillinMimeSizesOnlyIfReady == true,
-	//	DirectoryDetails::mimeDetailsList будет заполнена
-	//	только если сканирование указанной директории завершено.
+	// If fillinMimeSizesOnlyIfReady == true,
+	//	DirectoryDetails::mimeDetailsList is filled in
+	//	only if scanning of particular directory is complete
 	bool tryGetDirectory(
 		const QString& unifiedPath,
 		bool fillinMimeSizesOnlyIfReady,
@@ -43,7 +43,7 @@ private:
 	mutable std::mutex m_sync;
 
 	std::map<
-		QString,	// Унифицированный путь
+		QString,	// Unified path
 		DirectoryDetails
 	> m_directories;
 

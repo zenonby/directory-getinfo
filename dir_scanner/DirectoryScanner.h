@@ -19,7 +19,7 @@ public:
 
 	void setRootPath(const QString& rootPath);
 
-	// Вызвать перед завершением программы для завершения рабочего потока
+	// Call before exiting from the program for the sake of graceful work thread completion
 	void fini();
 
 	void subscribe(IDirectoryScannerEventSink* eventSink);
@@ -41,10 +41,10 @@ private:
 	void checkPendingFocusedParentPathAssignment();
 	void setFocusedPathWithLocking(const QString& dirPath);
 
-	// Стэк сканируемых директорий, дочерняя директория наверху
+	// Stack of directories being scanned. Child directories are on top of the stack.
 	WorkStack m_workStack;
 
-	// Потребители сообщений об обновлении данных
+	// Data update event subscribers
 	std::set<IDirectoryScannerEventSink*> m_eventSinks;
 
 	void prepareDtoAndNotifyEventSinks(
@@ -54,11 +54,12 @@ private:
 	void postDirInfo(KDirectoryInfoPtr pDirInfo);
 	void postMimeSizesInfo(KMimeSizesInfoPtr pDirInfo);
 
-	// Возвращает true в случае успешного завершения, false в случае отмены или паузы
+	// Returns true in case of scuccessful completion.
+	// Retuns false in case of cancellation or pause.
 	bool scanDirectory(WorkState* workState);
 
 	//
-	// Рабочий поток
+	// Work thread -related members
 	//
 
 	std::thread m_threadWorker;
@@ -78,28 +79,28 @@ private:
 	void worker();
 
 	//
-	// Поток уведомлений
+	// Notification thread -related members
 	//
 
 	std::thread m_threadNotifier;
 
-	// DTOs обновлений директории
+	// Directory update DTOs (for directory tree widget)
 	typedef std::map<
-		QString,	// Унифицированный путь
+		QString,	// Unified path
 		KDirectoryInfoPtr
 	> TDirInfoDTOs;
 	TDirInfoDTOs m_dirInfos;
 
-	// DTOs обновлений размеров по типам файлов
+	// MIME type total size update DTOs (for MIME total sizes table)
 	typedef std::map<
-		QString,	// Унифицированный путь
+		QString,	// Unified path
 		KMimeSizesInfoPtr
 	> TMimeSizesInfoDTOs;
 	TMimeSizesInfoDTOs m_mimeSizesInfos;
 
 	void notifier();
 
-	// Обработка ошибок рабочих потоков
+	// Work threads' errors handling
 	void handleWorkerException(std::exception_ptr&& pEx) noexcept;
 };
 

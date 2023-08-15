@@ -46,7 +46,7 @@ DirectoryScanner::setRootPath(const QString& rootPath)
 void
 DirectoryScanner::fini()
 {
-	// Проверить не осталось ли потребителей сообщений
+    // Check if any event subscribers/sinks are left
 	{
 		std::scoped_lock lock_(m_sync);
 
@@ -85,7 +85,7 @@ DirectoryScanner::prepareDtoAndNotifyEventSinks(
     bool acquireLock)
 {
     //
-    // Подготовить DTO
+    // Prepare DTO
     //
 
     auto pDirInfo = std::make_shared<KDirectoryInfo>();
@@ -127,7 +127,7 @@ DirectoryScanner::postDirInfo(KDirectoryInfoPtr pDirInfo)
     if (iter == m_dirInfos.end())
         m_dirInfos.emplace(std::make_pair(dirPath, pDirInfo));
     else
-        // Заменить на более новое
+        // Repace with newer one
         iter->second = pDirInfo;
 }
 
@@ -140,7 +140,7 @@ DirectoryScanner::postMimeSizesInfo(KMimeSizesInfoPtr pMimeSizesInfo)
     if (iter == m_mimeSizesInfos.end())
         m_mimeSizesInfos.emplace(std::make_pair(dirPath, pMimeSizesInfo));
     else
-        // Заменить на более новое
+        // Repace with newer one
         iter->second = pMimeSizesInfo;
 }
 
@@ -151,7 +151,7 @@ DirectoryScanner::requestCancellationAndWait(std::unique_lock<std::mutex>& lock_
         m_isCancellationRequested = false;
     });
 
-    // Дождаться завершения выполнения scanDirectory перед манипуляциями со стеком задач
+    // Wait for scanDirectory() to finish before changing the task stack
     m_isCancellationRequested = true;
     m_scanningDone.wait(lock_, [&] { return !m_isScanRunning; });
 }
@@ -188,13 +188,13 @@ DirectoryScanner::setFocusedPathWithLocking(const QString& dirPath)
 
     requestCancellationAndWait(lock_);
 
-    // Отменить все задачи до общей родительской
+    // Cancel all tasks up to the shared parent (between current and focused)
     while (!m_workStack.empty())
     {
         const WorkState& workState = m_workStack.top();
         auto workDirPath = workState.fullPath;
 
-        // Если совпадает с одной из задач из стека, больше ничего не делать
+        // If matches any of of tasks from the stack do nothing
         if (workDirPath == unifiedPath)
             return;
 
@@ -202,7 +202,7 @@ DirectoryScanner::setFocusedPathWithLocking(const QString& dirPath)
         {
             m_workStack.popScanDirectory(DirectoryProcessingStatus::Pending);
 
-            // Уведомить потребителей сообщений
+            // Notify event subscribers
             DirectoryDetails workDirDetails;
             bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, false, workDirDetails);
             assert(res);
@@ -216,13 +216,14 @@ DirectoryScanner::setFocusedPathWithLocking(const QString& dirPath)
         }
     }
 
-    // Крайняя родительская задача
+    // Top parent task
     WorkState topParentWorkState;
     if (!m_workStack.empty())
         topParentWorkState = m_workStack.top();
 
     //
-    // Добавить задачи от крайней родительской до dirPath
+    // Add task starting from the parent to dirPath
+    // (one per directory).
     //
 
     std::vector<QString> tmp;
@@ -284,13 +285,13 @@ DirectoryScanner::worker()
     {
         while (!isDestroying())
         {
-            // При выходе из scope
+            // On scope exit
             auto scopedNotify = scope_guard([&](auto) {
                 setScanRunning(false);
                 m_scanningDone.notify_all();
             });
 
-            // Выбрать задачу
+            // Select task
             WorkState* workState = nullptr;
             QString workDirPath;
             {
@@ -307,7 +308,7 @@ DirectoryScanner::worker()
                 workState = &m_workStack.top();
                 workDirPath = workState->fullPath;
 
-                // Не сканировать выше пути в фокусе
+                // Do not scan paths in focus
                 if (m_workStack.isAboveFocusedPath(workDirPath))
                 {
                     lock_.unlock();
@@ -340,7 +341,7 @@ DirectoryScanner::worker()
             {
                 try
                 {
-                    // После scanDirectory стек может изменитсья
+                    // After scanDirectory the stack might change
                     auto unsetWorkState = scope_guard([&](auto) {
                         workState = 0;
                         });
@@ -394,13 +395,13 @@ DirectoryScanner::notifier()
         {
             std::this_thread::sleep_for(500ms);
 
-            // Проверить, не был ли изменен фокус
+            // Check if focused path has not changed
             checkPendingFocusedParentPathAssignment();
 
             std::scoped_lock lock_(m_sync);
 
             //
-            // Выбрать текущие накопленные сообщения
+            // Extract currently collected events
             //
 
             TDirInfoDTOs dirInfos;
@@ -409,7 +410,7 @@ DirectoryScanner::notifier()
             TMimeSizesInfoDTOs mimeSizesInfos;
             mimeSizesInfos.swap(m_mimeSizesInfos);
 
-            // Уведомить всех потребителей сообщений
+            // Update all hungry event subscribers
             for (auto sink : m_eventSinks)
             {
                 assert(!!sink);
@@ -433,7 +434,7 @@ DirectoryScanner::handleWorkerException(std::exception_ptr&& pEx) noexcept
 {
     std::scoped_lock lock_(m_sync);
 
-    // Уведомить всех потребителей сообщений
+    // Update all event subscribers
     for (auto sink : m_eventSinks)
     {
         assert(!!sink);
@@ -466,7 +467,7 @@ DirectoryScanner::scanDirectory(WorkState* workState)
 
     unsigned long itemCount = 0;
 
-    // Если сканирование не было начато, создать итератор
+    // If scanning is not started create a directory/file iterator
     if (!workState->pDirIterator)
     {
         workState->pDirIterator = std::make_shared<std::filesystem::directory_iterator>(
@@ -486,20 +487,20 @@ DirectoryScanner::scanDirectory(WorkState* workState)
         {
             ++workState->subDirCount;
 
-            // Новая задача
+            // New task
             WorkState wState;
             wState.fullPath = fullPath;
 
-            // Еще валиден, но сбросить
+            // It's still valid but reset anyway
             workState = 0;
 
             std::scoped_lock lock_(m_sync);
             m_workStack.pushScanDirectory(wState);
 
-            // Сканирование этой директории будет возобновлено,
-            //  когда завершится только что созданная задача
+            // Scanning of this directory will be resumed
+            // when the just created task is complete.
 
-            // dirIterator будет продвинут вперед в случае успешного завершения дочерней задачи
+            // dirIterator is moved forward in case of successful child task completion
 
             return false;
         }
