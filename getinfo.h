@@ -47,7 +47,10 @@ private:
     Q_INVOKABLE void updateDirectoryInfo(KDirectoryInfoPtr pInfo);
     Q_INVOKABLE void updateMimeSizes(KMimeSizesInfoPtr pInfo);
     Q_INVOKABLE void workerException(const std::exception_ptr& pEx);
-    
+
+    // Restores 'Scan All' button state
+    Q_INVOKABLE void restoreScanAllButton();
+
     void readSettings();
     void writeSettings();
 

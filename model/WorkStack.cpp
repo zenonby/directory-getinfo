@@ -21,6 +21,14 @@ WorkStack::top() noexcept
 }
 
 void
+WorkStack::checkedPopScanDirectory()
+{
+    assert(!m_scanDirectories.top().pPromise && "Promise must be set_value() and reset() before popping a work item");
+
+    m_scanDirectories.pop();
+}
+
+void
 WorkStack::setFocusedPath(const QString& unifiedPath)
 {
     assert(isUnifiedPath(unifiedPath));
@@ -94,7 +102,8 @@ WorkStack::popScanDirectory(DirectoryProcessingStatus status)
 
     DirectoryStore::instance()->upsertDirectory(workState.fullPath, dirDetails);
 
-    m_scanDirectories.pop();
+    auto pPromise = std::move(top().pPromise);
+    checkedPopScanDirectory();
 
     // In case of successful completion add values (scan results)
     //  of this directory to the parent directory
@@ -102,21 +111,29 @@ WorkStack::popScanDirectory(DirectoryProcessingStatus status)
     {
         copyReadyScanDirectoryDataToParent(workState);
     }
+
+    if (pPromise)
+        pPromise->set_value(status);
 }
 
 void
 WorkStack::popReadyScanDirectory()
 {
+    auto pPromise = std::move(top().pPromise);
+
     // Just remove without changing status
-    m_scanDirectories.pop();
+    checkedPopScanDirectory();
 
     // Also move forward parent's directory iterator
     if (!m_scanDirectories.empty())
     {
         auto& pDirIterator = m_scanDirectories.top().pDirIterator;
-        if (!!pDirIterator)
+        if (pDirIterator)
             (*pDirIterator)++;
     }
+
+    if (pPromise)
+        pPromise->set_value(DirectoryProcessingStatus::Ready);
 }
 
 void
@@ -128,7 +145,7 @@ WorkStack::popDisabledScanDirectory()
     if (!m_scanDirectories.empty())
     {
         auto& pDirIterator = m_scanDirectories.top().pDirIterator;
-        if (!!pDirIterator)
+        if (pDirIterator)
             (*pDirIterator)++;
     }
 }
@@ -157,7 +174,7 @@ WorkStack::copyReadyScanDirectoryDataToParent(const WorkState& workState)
         parentWorkState.mimeSizes.addMimeDetails(workState.mimeSizes);
 
         // Also move forward the iterator
-        if (!!parentWorkState.pDirIterator)
+        if (parentWorkState.pDirIterator)
             (*parentWorkState.pDirIterator)++;
     }
 
@@ -179,5 +196,35 @@ WorkStack::copyReadyScanDirectoryDataToParent(const WorkState& workState)
             parentDirDetails.mimeDetailsList.value().addMimeDetails(workState.mimeSizes);
 
         DirectoryStore::instance()->upsertDirectory(parentDirPath, parentDirDetails);
+    }
+}
+
+void
+WorkStack::pauseTopDirectory()
+{
+    assert(!empty());
+
+    auto& workState = top();
+
+    // Handle promise
+    if (workState.pPromise)
+    {
+        // Cancel previous promise since focusing a child directory or
+        //  a new promise is assigned if requested
+        workState.pPromise->set_value(DirectoryProcessingStatus::Pending);
+        workState.pPromise.reset();
+    }
+
+    // Also update status
+    DirectoryDetails dirDetails;
+    bool res = DirectoryStore::instance()->tryGetDirectory(workState.fullPath, true, dirDetails);
+    if (res)
+    {
+        dirDetails.status = DirectoryProcessingStatus::Pending;
+        DirectoryStore::instance()->upsertDirectory(workState.fullPath, dirDetails);
+    }
+    else
+    {
+        assert(!"Direcory no found in the directory store");
     }
 }

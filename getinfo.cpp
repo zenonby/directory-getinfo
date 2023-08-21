@@ -145,7 +145,7 @@ GetInfo::onWorkerException(std::exception_ptr&& pEx)
 void
 GetInfo::updateDirectoryInfo(KDirectoryInfoPtr pInfo)
 {
-    assert(!!ui);
+    assert(ui);
 
     m_fsModel.SetDirectoryInfo(*pInfo);
 }
@@ -153,7 +153,7 @@ GetInfo::updateDirectoryInfo(KDirectoryInfoPtr pInfo)
 void
 GetInfo::updateMimeSizes(KMimeSizesInfoPtr pInfo)
 {
-    assert(!!ui);
+    assert(ui);
 
     // Updated directory
     QString updatedPath = getUnifiedPathName(pInfo->fullPath);
@@ -165,7 +165,7 @@ GetInfo::updateMimeSizes(KMimeSizesInfoPtr pInfo)
 void
 GetInfo::workerException(const std::exception_ptr& pEx)
 {
-    assert(!!ui);
+    assert(ui);
 
     try
     {
@@ -260,5 +260,61 @@ GetInfo::saveSnapshot()
 void
 GetInfo::scanAllDirectories()
 {
-assert(!"TO DO");
+    ui->actionScanAll->setChecked(true);
+    ui->actionScanAll->setEnabled(false);
+
+    ui->actionSaveSnapshot->setEnabled(false);
+
+    // Get root directories
+    std::vector<QString> topDirectories;
+    auto rootIndex = ui->treeDirectories->rootIndex();
+    const int count = m_fsModel.rowCount(rootIndex);
+    for (int i = 0; i < count; ++i)
+    {
+        auto childIndex = m_fsModel.index(i, 0, rootIndex);
+        auto childPath = m_fsModel.filePath(childIndex);
+        topDirectories.emplace_back(childPath);
+    }
+
+    // In a separate thread
+    std::thread th([topDirectories = topDirectories, self = this]()
+    {
+        for (auto path : topDirectories)
+        {
+            auto fut = DirectoryScanner::instance()->setFocusedPathAndGetFuture(path);
+
+            try
+            {
+                auto status = fut.get();
+
+                // Pending status means that scanning was cancelled
+                if (DirectoryProcessingStatus::Pending == status)
+                    break;
+            }
+            catch (const std::exception& ex)
+            {
+                assert(!"Unexpected exception in a bg thread");
+                qCritical(ex.what());
+            }
+            catch (...)
+            {
+                assert(false);
+                qCritical("Unknown exception in a bg thread");
+            }
+        }
+
+        bool res = QMetaObject::invokeMethod(
+            self, "restoreScanAllButton", Qt::QueuedConnection);
+        assert(res);
+    });
+    th.detach();
+}
+
+void
+GetInfo::restoreScanAllButton()
+{
+    ui->actionScanAll->setChecked(false);
+    ui->actionScanAll->setEnabled(true);
+
+    ui->actionSaveSnapshot->setEnabled(true);
 }

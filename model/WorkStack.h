@@ -3,6 +3,7 @@
 
 #include <stack>
 #include <memory>
+#include <future>
 #include <filesystem>
 #include <QString>
 
@@ -14,10 +15,16 @@ struct WorkState
 	// Unified path
 	QString	fullPath;
 
-	std::shared_ptr<std::filesystem::directory_iterator> pDirIterator;
+	typedef std::shared_ptr<std::filesystem::directory_iterator> TDirIteratorPtr;
+	TDirIteratorPtr pDirIterator;
 
 	unsigned long subDirCount = 0;
 	TMimeDetailsList mimeSizes;
+
+	// Promise is optional and can be used by UI thread to wait for completion.
+	typedef std::promise<DirectoryProcessingStatus> TPromise;
+	typedef std::shared_ptr<TPromise> TPromisePtr;
+	TPromisePtr pPromise;
 };
 
 class WorkStack
@@ -51,11 +58,17 @@ public:
 	// pops a task which caused an error from the work stack
 	void popErrorScanDirectory(const QString& workDirPath);
 
+	// Sets top directory status to paused due to switching to one of it's child
+	void pauseTopDirectory();
+
 private:
 	std::stack<WorkState> m_scanDirectories;
 
 	// Focused (from UI) scan path
 	QString m_focusedParentPath;
+
+	// Performs checks before popping an item
+	void checkedPopScanDirectory();
 };
 
 #endif // WORKSTACK_H

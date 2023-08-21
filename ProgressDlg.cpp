@@ -12,8 +12,8 @@ ProgressDlg::ProgressDlg(QWidget* parent,
       m_worker(worker),
       m_onComplete(onComplete)
 {
-    assert(!!m_worker);
-    assert(!!m_onComplete);
+    assert(m_worker);
+    assert(m_onComplete);
 
     start();
 }
@@ -30,7 +30,7 @@ ProgressDlg::setProgressPercentage(int progressPercentage)
 void
 ProgressDlg::setProgressPercentageImpl(int progressPercentage)
 {
-    assert(!!m_progressDlg);
+    assert(m_progressDlg);
     m_progressDlg->setValue(progressPercentage);
 }
 
@@ -67,8 +67,8 @@ ProgressDlg::start()
 void
 ProgressDlg::complete()
 {
-    assert(!!m_progressDlg);
-    assert(!!m_progressPromise);
+    assert(m_progressDlg);
+    assert(m_progressPromise);
 
     m_progressDlg->close();
     m_progressDlg.reset();
@@ -93,8 +93,8 @@ ProgressDlg::complete()
 void
 ProgressDlg::workerWrapper()
 {
-    assert(!!m_progressPromise);
-    assert(!!m_worker);
+    assert(m_progressPromise);
+    assert(m_worker);
 
     try
     {

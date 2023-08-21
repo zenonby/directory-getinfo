@@ -135,6 +135,9 @@
    </property>
   </action>
   <action name="actionScanAll">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/scan_all.png</normaloff>:/icons/resources/scan_all.png</iconset>
