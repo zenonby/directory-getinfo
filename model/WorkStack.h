@@ -10,7 +10,7 @@
 #include "model/DirectoryDetails.h"
 
 // Scan state
-struct WorkState
+struct WorkState : DirectoryStats
 {
 	// Unified path
 	QString	fullPath;
@@ -18,7 +18,6 @@ struct WorkState
 	typedef std::shared_ptr<std::filesystem::directory_iterator> TDirIteratorPtr;
 	TDirIteratorPtr pDirIterator;
 
-	unsigned long subDirCount = 0;
 	TMimeDetailsList mimeSizes;
 
 	// Promise is optional and can be used by UI thread to wait for completion.

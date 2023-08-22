@@ -13,7 +13,7 @@ class KFileSystemModel : public QFileSystemModel
 public:
 	KFileSystemModel();
 
-	enum { NumColumns = 3 };
+	enum { NumColumns = 5 };
 
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override
 	{

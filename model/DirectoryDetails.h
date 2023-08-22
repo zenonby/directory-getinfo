@@ -5,21 +5,24 @@
 
 #include "DirectoryProcessingStatus.h"
 #include "MimeDetails.h"
+#include "DirectoryStats.h"
 
 // Information, collected about a particular directory
-struct DirectoryDetails
+struct DirectoryDetails : DirectoryStatsWithStatus
 {
-	DirectoryProcessingStatus status;
 	bool scan = false;
-	std::optional<unsigned long> subdirectoryCount = {};
 	std::optional<TMimeDetailsList> mimeDetailsList = {};
 
 	DirectoryDetails clone(bool cloneMimeDetails) const
 	{
 		DirectoryDetails retVal{
-			status, scan, subdirectoryCount,
+			{ { .subdirectoryCount = subdirectoryCount,
+			    .totalFileCount = totalFileCount,
+			    .totalSize = totalSize }, status },
+			scan,
 			cloneMimeDetails ? mimeDetailsList : std::optional<TMimeDetailsList>{}
 		};
+
 		return retVal;
 	}
 };

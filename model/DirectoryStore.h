@@ -14,10 +14,11 @@ public:
 
 	static DirectoryStore* instance();
 
-	// Unspecified members of dirDetails (optional) are not updated or deleted
+	// if updateDirectoryStats is false, directory stats are not updated
 	void upsertDirectory(
 		const QString& unifiedPath,
-		const DirectoryDetails& dirDetails);
+		const DirectoryDetails& dirDetails,
+		bool updateDirectoryStats);
 
 	// If fillinMimeSizesOnlyIfReady == true,
 	//	DirectoryDetails::mimeDetailsList is filled in

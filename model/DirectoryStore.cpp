@@ -24,7 +24,8 @@ DirectoryStore::instance()
 void
 DirectoryStore::upsertDirectory(
 	const QString& unifiedPath,
-	const DirectoryDetails& dirDetails)
+	const DirectoryDetails& dirDetails,
+	bool updateDirectoryStats)
 {
 	assert(isUnifiedPath(unifiedPath));
 
@@ -34,7 +35,7 @@ DirectoryStore::upsertDirectory(
 	if (iter == m_directories.end())
 	{
 		auto tup = m_directories.emplace(std::make_pair(unifiedPath, DirectoryDetails{
-			DirectoryProcessingStatus::Pending, {}, {} }));
+			{ .status = DirectoryProcessingStatus::Pending } }));
 		assert(tup.second);
 		iter = tup.first;
 	}
@@ -42,8 +43,8 @@ DirectoryStore::upsertDirectory(
 	DirectoryDetails &existingDirDetails = iter->second;
 	existingDirDetails.status = dirDetails.status;
 
-	if (dirDetails.subdirectoryCount.has_value())
-		existingDirDetails.subdirectoryCount = dirDetails.subdirectoryCount;
+	if (updateDirectoryStats)
+		existingDirDetails.DirectoryStats::assignStats(dirDetails);
 
 	if (dirDetails.mimeDetailsList.has_value())
 		existingDirDetails.mimeDetailsList = dirDetails.mimeDetailsList;
@@ -113,6 +114,7 @@ DirectoryStore::checkCreateDbSchema()
 			L"id INTEGER PRIMARY KEY,\n"
 			L"snapshot_id INTEGER NOT NULL,\n"
 			L"path TEXT NOT NULL,\n"
+			L"total_file_count INTEGER NOT NULL,\n"
 			L"total_size INTEGER NOT NULL,\n"
 			L"FOREIGN KEY (snapshot_id) REFERENCES " SQL_TABLE_SNAPSHOTS L"(id)\n"
 			L")");
@@ -149,8 +151,8 @@ DirectoryStore::saveCurrentData()
 		const int snapshotId = rs.getInt(0).value();
 
 		const auto sqlInsertDir =
-			L"INSERT INTO " SQL_TABLE_DIRECTORIES L" (snapshot_id, path, total_size) "
-			L"VALUES (?, ?, ?)";
+			L"INSERT INTO " SQL_TABLE_DIRECTORIES L" (snapshot_id, path, total_file_count, total_size) "
+			L"VALUES (?, ?, ?, ?)";
 
 		// Add directory data
 		for (auto iter = m_directories.cbegin(); iter != m_directories.cend(); ++iter)
@@ -165,11 +167,21 @@ DirectoryStore::saveCurrentData()
 			auto mimeDetailsList = dirDetails.mimeDetailsList.value();
 			auto mimeDetails = mimeDetailsList[TMimeDetailsList::ALL_MIMETYPE];
 
-			db.prepare(sqlInsertDir)
+			auto cmd = std::move(db.prepare(sqlInsertDir)
 				.addParameter(snapshotId)
-				.addParameter(unifiedPath.toStdWString())
-				.addParameter(static_cast<long long>(mimeDetails.totalSize))
-				.execute();
+				.addParameter(unifiedPath.toStdWString()));
+
+			if (dirDetails.totalFileCount.has_value())
+				cmd.addParameter(static_cast<long long>(dirDetails.totalFileCount.value()));
+			else
+				cmd.addParameterNull();
+
+			if (dirDetails.totalSize.has_value())
+				cmd.addParameter(static_cast<long long>(dirDetails.totalSize.value()));
+			else
+				cmd.addParameterNull();
+
+			cmd.execute();
 		}
 
 		transaction.commit();

@@ -4,16 +4,11 @@
 #include <memory>
 #include <optional>
 #include <QString>
-#include "model/DirectoryProcessingStatus.h"
+#include "model/DirectoryStats.h"
 
 // Directory data without a directory path
-struct KDirectoryData
+struct KDirectoryData : DirectoryStatsWithStatus
 {
-	// Directory scanning status
-	DirectoryProcessingStatus status = DirectoryProcessingStatus::Pending;
-
-	// Immediate subdirectory count
-	std::optional<unsigned long> subDirCount = 0;
 };
 
 // Directory tree item

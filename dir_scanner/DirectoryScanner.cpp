@@ -90,8 +90,7 @@ DirectoryScanner::prepareDtoAndNotifyEventSinks(
 
     auto pDirInfo = std::make_shared<KDirectoryInfo>();
     pDirInfo->fullPath = dirPath;
-    pDirInfo->status = dirDetails.status;
-    pDirInfo->subDirCount = dirDetails.subdirectoryCount;
+    pDirInfo->assignStatsWithStatus(dirDetails);
 
     bool sendMimeSizes = false;
     KMimeSizesInfoPtr pMimeInfo;
@@ -392,7 +391,7 @@ DirectoryScanner::worker()
 
                     bool scanned = scanDirectory(workState);
 
-                    workDirDetails.subdirectoryCount = workState->subDirCount;
+                    workDirDetails.DirectoryStats::assignStats(*workState);
                     workDirDetails.mimeDetailsList = workState->mimeSizes;
 
                     if (scanned)
@@ -516,6 +515,15 @@ DirectoryScanner::scanDirectory(WorkState* workState)
             workState->fullPath.toStdWString());
     }
 
+    if (!workState->subdirectoryCount.has_value())
+        workState->subdirectoryCount = 0;
+
+    if (!workState->totalFileCount.has_value())
+        workState->totalFileCount = 0;
+
+    if (!workState->totalSize.has_value())
+        workState->totalSize = 0;
+
     auto& dirIterator = *workState->pDirIterator;
     for (const auto& entry : dirIterator)
     {
@@ -527,7 +535,7 @@ DirectoryScanner::scanDirectory(WorkState* workState)
 
         if (entry.is_directory())
         {
-            ++workState->subDirCount;
+            workState->subdirectoryCount = workState->subdirectoryCount.value() + 1;
 
             // New task
             WorkState wState;
@@ -555,6 +563,9 @@ DirectoryScanner::scanDirectory(WorkState* workState)
             const QString& extension = QString::fromStdWString(extension_);
 
             auto fileSize = entry.file_size();
+
+            workState->totalSize = workState->totalSize.value() + fileSize;
+            workState->totalFileCount = workState->totalFileCount.value() + 1;
 
             workState->mimeSizes.addMimeDetails(TMimeDetailsList::ALL_MIMETYPE, fileSize, 1);
             workState->mimeSizes.addMimeDetails(extension, fileSize, 1);

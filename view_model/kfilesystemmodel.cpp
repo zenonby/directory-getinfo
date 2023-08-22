@@ -44,6 +44,13 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 {
 	const int columnIndex = index.column();
 
+	if (role == Qt::TextAlignmentRole &&
+		index.isValid() &&
+		1 <= index.column() && index.column() <= 3)
+	{
+		return static_cast<int>(Qt::AlignVCenter | Qt::AlignRight);
+	}
+
 	if (role == Qt::CheckStateRole &&
 		index.isValid() &&
 		index.column() == 0)
@@ -65,14 +72,20 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 		switch (columnIndex)
 		{
 		case 1:
-			return nullptr != dirData && dirData->subDirCount.has_value() ?
-				QString("%L1").arg(static_cast<unsigned long long>(dirData->subDirCount.value())) :
+			return nullptr != dirData && dirData->subdirectoryCount.has_value() ?
+				QString("%L1").arg(static_cast<unsigned long long>(dirData->subdirectoryCount.value())) :
 				QString();
-			break;
 		case 2:
+			return nullptr != dirData && dirData->totalFileCount.has_value() ?
+				QVariant(static_cast<qulonglong>(dirData->totalFileCount.value())) :
+				QVariant();
+		case 3:
+			return nullptr != dirData && dirData->totalSize.has_value() ?
+				QVariant(static_cast<qulonglong>(dirData->totalSize.value())) :
+				QVariant();
+		case 4:
 			return translateDirectoryProcessingStatus(
 				nullptr != dirData ? dirData->status : DirectoryProcessingStatus::Pending);
-			break;
 		default:
 			assert(!"Unexpected");
 		}
@@ -101,7 +114,13 @@ KFileSystemModel::headerData(int section, Qt::Orientation orientation, int role)
 		case 1:
 			returnValue = tr("Subdirs");
 			break;
-		case 2: returnValue =
+		case 2:
+			returnValue = tr("Total files");
+			break;
+		case 3:
+			returnValue = tr("Total size");
+			break;
+		case 4:
 			returnValue = tr("Status");
 			break;
 		default:
