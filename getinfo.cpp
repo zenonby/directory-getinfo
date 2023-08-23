@@ -5,6 +5,7 @@
 #include "getinfo.h"
 #include "./ui_getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
+#include "dir_scanner/AllDirectoriesScanner.h"
 #include "model/DirectoryStore.h"
 #include "utils.h"
 #include "settings.h"
@@ -51,6 +52,11 @@ GetInfo::GetInfo(QWidget* parent)
 GetInfo::~GetInfo()
 {
     DirectoryScanner::instance()->unsubscribe(this);
+
+    // Before destroying ui
+    // so that a possibly executing callbackComplete lambda in scanAllDirectories()
+    // which requires ui would finish before ui is destroyed.
+    AllDirectoriesScanner::instance()->ignoreCallbackComplete();
 
     delete ui;
     ui = nullptr;
@@ -276,38 +282,13 @@ GetInfo::scanAllDirectories()
         topDirectories.emplace_back(childPath);
     }
 
-    // In a separate thread
-    std::thread th([topDirectories = topDirectories, self = this]()
-    {
-        for (auto path : topDirectories)
+    AllDirectoriesScanner::instance()->scanDirectoriesSequentially(
+        topDirectories, [self = this]()
         {
-            auto fut = DirectoryScanner::instance()->setFocusedPathAndGetFuture(path);
-
-            try
-            {
-                auto status = fut.get();
-
-                // Pending status means that scanning was cancelled
-                if (DirectoryProcessingStatus::Pending == status)
-                    break;
-            }
-            catch (const std::exception& ex)
-            {
-                assert(!"Unexpected exception in a bg thread");
-                qCritical(ex.what());
-            }
-            catch (...)
-            {
-                assert(false);
-                qCritical("Unknown exception in a bg thread");
-            }
-        }
-
-        bool res = QMetaObject::invokeMethod(
-            self, "restoreScanAllButton", Qt::QueuedConnection);
-        assert(res);
-    });
-    th.detach();
+            bool res = QMetaObject::invokeMethod(
+                self, "restoreScanAllButton", Qt::QueuedConnection);
+            assert(res);
+        });
 }
 
 void

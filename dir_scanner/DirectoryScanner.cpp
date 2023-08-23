@@ -317,6 +317,15 @@ DirectoryScanner::stopWorker() noexcept
 
     m_threadWorker.join();
     m_threadNotifier.join();
+
+    // Pop remaining work items from the stack so that possible promises would be handled
+    {
+        std::scoped_lock lock_(m_sync);
+        while (!m_workStack.empty())
+        {
+            m_workStack.popScanDirectory(DirectoryProcessingStatus::Pending);
+        }
+    }
 }
 
 void

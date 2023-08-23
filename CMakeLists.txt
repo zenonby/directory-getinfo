@@ -42,6 +42,8 @@ set(PROJECT_SOURCES
         model/DirectoryProcessingStatus.h
         model/DirectoryScanSwitch.cpp
         model/DirectoryScanSwitch.h
+        dir_scanner/AllDirectoriesScanner.cpp
+        dir_scanner/AllDirectoriesScanner.h
         dir_scanner/DirectoryScanner.cpp
         dir_scanner/DirectoryScanner.h
         dir_scanner/IDirectoryScannerEventSink.h

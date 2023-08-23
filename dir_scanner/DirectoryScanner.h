@@ -32,6 +32,8 @@ private:
 	DirectoryScanner();
 	DirectoryScanner(const DirectoryScanner&) = delete;
 	DirectoryScanner& operator=(const DirectoryScanner&) = delete;
+	DirectoryScanner(DirectoryScanner&&) = delete;
+	DirectoryScanner& operator=(DirectoryScanner&&) = delete;
 
 	mutable std::mutex m_sync;
 	QString m_rootPath;
