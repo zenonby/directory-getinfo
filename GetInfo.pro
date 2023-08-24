@@ -15,6 +15,7 @@ SOURCES += \
     utils.cpp \
     settings.cpp \
     ProgressDlg.cpp \
+    FileSizeDivisor.cpp \
     model/DirectoryStore.cpp \
     model/MimeDetails.cpp \
     model/WorkStack.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     utils.h \
     settings.h \
     ProgressDlg.h \
+    FileSizeDivisor.h \
     model/DirectoryDetails.h \
     model/DirectoryProcessingStatus.h \
     model/DirectoryStore.h \

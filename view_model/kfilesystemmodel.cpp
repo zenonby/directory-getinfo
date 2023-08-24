@@ -25,6 +25,19 @@ KFileSystemModel::KFileSystemModel()
 	connect(this, SIGNAL(directoryLoaded(QString)), this, SLOT(onDirectoryLoaded(QString)));
 }
 
+void
+KFileSystemModel::setFileSizeDivisor(FileSizeDivisor divisor)
+{
+	bool changed = m_divisor != divisor;
+	m_divisor = divisor;
+
+	if (changed)
+	{
+		emit dataChanged(index(0, 0), index(rowCount() - 1, NumColumns - 1));
+		emit headerDataChanged(Qt::Horizontal, 0, NumColumns - 1);
+	}
+}
+
 Qt::ItemFlags
 KFileSystemModel::flags(const QModelIndex& index) const
 {
@@ -60,6 +73,8 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 		return static_cast<int>(enabled ? Qt::Checked : Qt::Unchecked);
 	}
 
+	unsigned int divisorValue = FileSizeDivisorUtils::getDivisorValue(m_divisor);
+
 	if (Qt::DisplayRole == role &&
 		index.isValid() &&
 		0 < columnIndex)
@@ -77,12 +92,12 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 				QString();
 		case 2:
 			return nullptr != dirData && dirData->totalFileCount.has_value() ?
-				QVariant(static_cast<qulonglong>(dirData->totalFileCount.value())) :
-				QVariant();
+				QString("%L1").arg(static_cast<qulonglong>(dirData->totalFileCount.value())) :
+				QString();
 		case 3:
 			return nullptr != dirData && dirData->totalSize.has_value() ?
-				QVariant(static_cast<qulonglong>(dirData->totalSize.value())) :
-				QVariant();
+				QString("%L1").arg(static_cast<qulonglong>(dirData->totalSize.value() / divisorValue)) :
+				QString();
 		case 4:
 			return translateDirectoryProcessingStatus(
 				nullptr != dirData ? dirData->status : DirectoryProcessingStatus::Pending);
@@ -118,7 +133,7 @@ KFileSystemModel::headerData(int section, Qt::Orientation orientation, int role)
 			returnValue = tr("Total files");
 			break;
 		case 3:
-			returnValue = tr("Total size");
+			returnValue = tr("Total size, ") + FileSizeDivisorUtils::getDivisorSuffix(m_divisor);
 			break;
 		case 4:
 			returnValue = tr("Status");

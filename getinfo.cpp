@@ -94,7 +94,8 @@ GetInfo::switchToBytes()
     ui->actionSwitchToKBytes->setChecked(false);
     ui->actionSwitchToMBytes->setChecked(false);
 
-    m_msModel.setFileSizeDivisor(KMimeSizesModel::FileSizeDivisor::Bytes);
+    m_fsModel.setFileSizeDivisor(FileSizeDivisor::Bytes);
+    m_msModel.setFileSizeDivisor(FileSizeDivisor::Bytes);
 }
 
 void
@@ -106,7 +107,8 @@ GetInfo::switchToKBytes()
     ui->actionSwitchToBytes->setChecked(false);
     ui->actionSwitchToMBytes->setChecked(false);
 
-    m_msModel.setFileSizeDivisor(KMimeSizesModel::FileSizeDivisor::KBytes);
+    m_fsModel.setFileSizeDivisor(FileSizeDivisor::KBytes);
+    m_msModel.setFileSizeDivisor(FileSizeDivisor::KBytes);
 }
 
 void
@@ -118,7 +120,8 @@ GetInfo::switchToMBytes()
     ui->actionSwitchToBytes->setChecked(false);
     ui->actionSwitchToKBytes->setChecked(false);
 
-    m_msModel.setFileSizeDivisor(KMimeSizesModel::FileSizeDivisor::MBytes);
+    m_fsModel.setFileSizeDivisor(FileSizeDivisor::MBytes);
+    m_msModel.setFileSizeDivisor(FileSizeDivisor::MBytes);
 }
 
 void

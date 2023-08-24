@@ -32,6 +32,8 @@ set(PROJECT_SOURCES
         settings.h
         ProgressDlg.cpp
         ProgressDlg.h
+        FileSizeDivisor.cpp
+        FileSizeDivisor.h
         model/DirectoryStore.cpp
         model/DirectoryStore.h
         model/DirectoryDetails.h

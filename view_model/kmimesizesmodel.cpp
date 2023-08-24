@@ -15,42 +15,6 @@ KMimeSizesModel::setFileSizeDivisor(FileSizeDivisor divisor)
     }
 }
 
-QString
-KMimeSizesModel::getDivisorSuffix() const noexcept
-{
-    switch (m_divisor)
-    {
-    case FileSizeDivisor::Bytes:
-        return tr("B");
-    case FileSizeDivisor::KBytes:
-        return tr("KB");
-    case FileSizeDivisor::MBytes:
-        return tr("MB");
-    default:
-        assert(!"Unexpected FileSizeDivisor value");
-    }
-
-    return "";
-}
-
-unsigned int
-KMimeSizesModel::getDivisorValue() const noexcept
-{
-    switch (m_divisor)
-    {
-    case FileSizeDivisor::Bytes:
-        return 1;
-    case FileSizeDivisor::KBytes:
-        return 1024;
-    case FileSizeDivisor::MBytes:
-        return 1024 * 1024;
-    default:
-        assert(!"Unexpected FileSizeDivisor value");
-    }
-
-    return 1;
-}
-
 int
 KMimeSizesModel::rowCount(const QModelIndex&) const
 {
@@ -80,10 +44,10 @@ KMimeSizesModel::headerData(int section, Qt::Orientation orientation, int role) 
         returnValue = tr("File count");
         break;
     case 2:
-        returnValue = tr("Total size, ") + getDivisorSuffix();
+        returnValue = tr("Total size, ") + FileSizeDivisorUtils::getDivisorSuffix(m_divisor);
         break;
     case 3: returnValue =
-        returnValue = tr("Avg size, ") + getDivisorSuffix();
+        returnValue = tr("Avg size, ") + FileSizeDivisorUtils::getDivisorSuffix(m_divisor);
         break;
     default:
         assert(!"Unexpected");
@@ -109,7 +73,7 @@ KMimeSizesModel::data(const QModelIndex& index, int role) const
         return font;
     }
 
-    unsigned int divisorValue = getDivisorValue();
+    unsigned int divisorValue = FileSizeDivisorUtils::getDivisorValue(m_divisor);
 
     if (Qt::DisplayRole == role &&
         index.isValid())

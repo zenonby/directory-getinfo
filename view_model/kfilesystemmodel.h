@@ -2,8 +2,8 @@
 #define KFILESYSTEMMODEL_H
 
 #include <QFileSystemModel>
-
 #include "dir_scanner/KDirectoryInfo.h"
+#include "FileSizeDivisor.h"
 
 // Directory tree model
 class KFileSystemModel : public QFileSystemModel
@@ -14,6 +14,8 @@ public:
 	KFileSystemModel();
 
 	enum { NumColumns = 5 };
+
+	void setFileSizeDivisor(FileSizeDivisor divisor);
 
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override
 	{
@@ -28,6 +30,8 @@ public:
 	void SetDirectoryInfo(const KDirectoryInfo& dirInfo);
 
 private:
+	FileSizeDivisor m_divisor = FileSizeDivisor::Bytes;
+
 	std::map<
 		QString, // N.B. __Unified__ path. Translate to unified path before insertion !
 		KDirectoryData
