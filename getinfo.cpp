@@ -81,7 +81,16 @@ GetInfo::treeDirectoriesSelectionChanged(
         auto selectedIndex = selectedindexes.first();
         m_unifiedSelectedPath = getUnifiedPathName(m_fsModel.filePath(selectedIndex));
 
-        DirectoryScanner::instance()->setFocusedPath(m_unifiedSelectedPath);
+        std::vector<QString> dirs;
+        dirs.push_back(m_unifiedSelectedPath);
+        AllDirectoriesScanner::instance()->scanDirectoriesSequentially(dirs, [self = this]()
+        {
+#if 0
+                bool res = QMetaObject::invokeMethod(
+                    self, "", Qt::QueuedConnection);
+                assert(res);
+#endif
+        });
     }
 }
 

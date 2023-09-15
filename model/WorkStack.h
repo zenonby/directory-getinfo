@@ -35,9 +35,9 @@ public:
 	WorkState& top() noexcept;
 
 	// unifiedPath - unified path
-	void setFocusedPath(const QString& unifiedPath);
+	void setFocusedPath(const QString& unifiedPath = QString());
 
-	bool isAboveFocusedPath(const QString& unifiedPath) const noexcept;
+	bool isAboveOrEqualFocusedPath(const QString& unifiedPath) const noexcept;
 
 	// Pushes a work task on the work stack
 	void pushScanDirectory(const WorkState& workState);

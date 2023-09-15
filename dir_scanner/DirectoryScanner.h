@@ -27,6 +27,7 @@ public:
 
 	void setFocusedPath(const QString& dirPath);
 	std::future<DirectoryProcessingStatus> setFocusedPathAndGetFuture(const QString& dirPath);
+	void resetFocusedPathWithLocking();
 
 private:
 	DirectoryScanner();
@@ -45,7 +46,7 @@ private:
 		WorkState::TPromisePtr pPromise;
 	};
 
-	mutable std::mutex m_syncFocusedParentPath;
+	mutable std::mutex m_syncPendingFocusedParentPath;
 	mutable std::condition_variable m_cvFocusedParentPath; // For notification that value is picked up
 	std::optional<PendingFocusedParentPath> m_pendingFocusedParentPath; // Waiting for being set
 
@@ -53,6 +54,8 @@ private:
 	void setFocusedPathWithLocking(
 		const QString& dirPath,
 		WorkState::TPromisePtr pPromise);
+
+	void popScanDirectoryAndSetPending();
 
 	// Stack of directories being scanned. Child directories are on top of the stack.
 	WorkStack m_workStack;

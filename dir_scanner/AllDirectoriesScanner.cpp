@@ -67,10 +67,13 @@ AllDirectoriesScanner::scanDirectoriesSequentially(
     std::function<void()> callbackComplete)
 {
     // Check that there's no other sequential scan is running
+    bool hasActiveFuture = false;
     {
         std::scoped_lock lock_(m_sync);
-        assert(!m_activeFuture.has_value());
+        hasActiveFuture = m_activeFuture.has_value();
     }
+
+    DirectoryScanner::instance()->resetFocusedPathWithLocking();
 
     waitForActiveFutureToFinish();
 

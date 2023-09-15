@@ -158,7 +158,7 @@ DirectoryScanner::requestCancellationAndWait(std::unique_lock<std::mutex>& lock_
 void
 DirectoryScanner::setFocusedPath(const QString& dirPath)
 {
-    std::unique_lock lock_(m_syncFocusedParentPath);
+    std::unique_lock lock_(m_syncPendingFocusedParentPath);
 
     m_pendingFocusedParentPath = PendingFocusedParentPath{ dirPath };
 }
@@ -166,7 +166,7 @@ DirectoryScanner::setFocusedPath(const QString& dirPath)
 std::future<DirectoryProcessingStatus>
 DirectoryScanner::setFocusedPathAndGetFuture(const QString& dirPath)
 {
-    std::unique_lock lock_(m_syncFocusedParentPath);
+    std::unique_lock lock_(m_syncPendingFocusedParentPath);
 
     auto pPromise = std::make_shared<WorkState::TPromise>();
     auto fut = pPromise->get_future();
@@ -185,7 +185,7 @@ DirectoryScanner::checkPendingFocusedParentPathAssignment()
 {
     std::optional<PendingFocusedParentPath> pendingFocusedParentPath;
     {
-        std::scoped_lock lock_(m_syncFocusedParentPath);
+        std::scoped_lock lock_(m_syncPendingFocusedParentPath);
 
         if (m_pendingFocusedParentPath.has_value())
         {
@@ -203,6 +203,19 @@ DirectoryScanner::checkPendingFocusedParentPathAssignment()
         // Notify UI thread
         m_cvFocusedParentPath.notify_all();
     }
+}
+
+void
+DirectoryScanner::resetFocusedPathWithLocking()
+{
+    std::unique_lock lock_(m_sync);
+
+    m_workStack.setFocusedPath();
+
+    requestCancellationAndWait(lock_);
+
+    while (!m_workStack.empty())
+        popScanDirectoryAndSetPending();
 }
 
 void
@@ -230,15 +243,7 @@ DirectoryScanner::setFocusedPathWithLocking(
 
         if (!isParentPath(unifiedPath, workDirPath))
         {
-            m_workStack.popScanDirectory(DirectoryProcessingStatus::Pending);
-
-            // Notify event subscribers
-            DirectoryDetails workDirDetails;
-            bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, false, workDirDetails);
-            assert(res);
-
-            workDirDetails.status = DirectoryProcessingStatus::Pending;
-            prepareDtoAndNotifyEventSinks(workDirPath, workDirDetails, false);
+            popScanDirectoryAndSetPending();
         }
         else
         {
@@ -290,6 +295,23 @@ DirectoryScanner::setFocusedPathWithLocking(
         assert(!m_workStack.empty());
         m_workStack.top().pPromise = pPromise;
     }
+}
+
+void
+DirectoryScanner::popScanDirectoryAndSetPending()
+{
+    const WorkState& workState = m_workStack.top();
+    auto workDirPath = workState.fullPath;
+
+    m_workStack.popScanDirectory(DirectoryProcessingStatus::Pending);
+
+    // Notify event subscribers
+    DirectoryDetails workDirDetails;
+    bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, false, workDirDetails);
+    assert(res);
+
+    workDirDetails.status = DirectoryProcessingStatus::Pending;
+    prepareDtoAndNotifyEventSinks(workDirPath, workDirDetails, false);
 }
 
 bool
@@ -359,7 +381,7 @@ DirectoryScanner::worker()
                 workDirPath = workState->fullPath;
 
                 // Do not scan paths in focus
-                if (m_workStack.isAboveFocusedPath(workDirPath))
+                if (m_workStack.isAboveOrEqualFocusedPath(workDirPath))
                 {
                     lock_.unlock();
                     std::this_thread::sleep_for(100ms);

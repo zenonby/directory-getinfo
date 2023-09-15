@@ -38,7 +38,7 @@ WorkStack::setFocusedPath(const QString& unifiedPath)
 }
 
 bool
-WorkStack::isAboveFocusedPath(const QString& unifiedPath) const noexcept
+WorkStack::isAboveOrEqualFocusedPath(const QString& unifiedPath) const noexcept
 {
     bool res = m_focusedParentPath.startsWith(unifiedPath);
     return res;
@@ -72,11 +72,10 @@ WorkStack::pushScanDirectory(const WorkState& workState)
     }
 
     // Update status
-    if (!m_focusedParentPath.startsWith(workDirPath) &&
-        (!res ||
-            (DirectoryProcessingStatus::Ready != dirDetails.status &&
-                DirectoryProcessingStatus::Error != dirDetails.status &&
-                DirectoryProcessingStatus::Scanning != dirDetails.status)))
+    if (!res ||
+         (DirectoryProcessingStatus::Ready != dirDetails.status &&
+          DirectoryProcessingStatus::Error != dirDetails.status &&
+          DirectoryProcessingStatus::Scanning != dirDetails.status))
     {
         dirDetails.status = DirectoryProcessingStatus::Scanning;
 
