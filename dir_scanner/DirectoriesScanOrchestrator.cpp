@@ -2,31 +2,31 @@
 #include <thread>
 #include "utils.h"
 #include "DirectoryScanner.h"
-#include "AllDirectoriesScanner.h"
+#include "DirectoriesScanOrchestrator.h"
 
-AllDirectoriesScanner::AllDirectoriesScanner()
+DirectoriesScanOrchestrator::DirectoriesScanOrchestrator()
     : m_ignoreCallbackComplete(false)
 {
 }
 
-AllDirectoriesScanner::~AllDirectoriesScanner()
+DirectoriesScanOrchestrator::~DirectoriesScanOrchestrator()
 {
 }
 
-AllDirectoriesScanner*
-AllDirectoriesScanner::instance()
+DirectoriesScanOrchestrator*
+DirectoriesScanOrchestrator::instance()
 {
-	static AllDirectoriesScanner s_instance;
+	static DirectoriesScanOrchestrator s_instance;
 	return &s_instance;
 }
 
 void
-AllDirectoriesScanner::fini()
+DirectoriesScanOrchestrator::fini()
 {
     waitForActiveFutureToFinish();
 }
 
-void AllDirectoriesScanner::waitForActiveFutureToFinish()
+void DirectoriesScanOrchestrator::waitForActiveFutureToFinish()
 {
     decltype(m_activeFuture) fut;
 
@@ -41,14 +41,14 @@ void AllDirectoriesScanner::waitForActiveFutureToFinish()
 }
 
 void
-AllDirectoriesScanner::resetActiveFuture()
+DirectoriesScanOrchestrator::resetActiveFuture()
 {
     std::scoped_lock lock_(m_sync);
     m_activeFuture.reset();
 }
 
 DirectoryProcessingStatus
-AllDirectoriesScanner::setAndGetActiveFuture(std::future<DirectoryProcessingStatus>&& fut)
+DirectoriesScanOrchestrator::setAndGetActiveFuture(std::future<DirectoryProcessingStatus>&& fut)
 {
     std::shared_future<DirectoryProcessingStatus> futClone;
 
@@ -62,7 +62,7 @@ AllDirectoriesScanner::setAndGetActiveFuture(std::future<DirectoryProcessingStat
 }
 
 void
-AllDirectoriesScanner::scanDirectoriesSequentially(
+DirectoriesScanOrchestrator::scanDirectoriesSequentially(
     const std::vector<QString>& directories,
     std::function<void()> callbackComplete)
 {
@@ -78,13 +78,13 @@ AllDirectoriesScanner::scanDirectoriesSequentially(
     waitForActiveFutureToFinish();
 
     std::thread th(
-        std::bind(&AllDirectoriesScanner::scanDirectoriesSequentiallyWorker, this, directories, callbackComplete)
+        std::bind(&DirectoriesScanOrchestrator::scanDirectoriesSequentiallyWorker, this, directories, callbackComplete)
     );
     th.detach();
 }
 
 void
-AllDirectoriesScanner::scanDirectoriesSequentiallyWorker(
+DirectoriesScanOrchestrator::scanDirectoriesSequentiallyWorker(
     const std::vector<QString> directories,
     std::function<void()> callbackComplete)
 {
@@ -127,7 +127,7 @@ AllDirectoriesScanner::scanDirectoriesSequentiallyWorker(
 }
 
 void
-AllDirectoriesScanner::ignoreCallbackComplete()
+DirectoriesScanOrchestrator::ignoreCallbackComplete()
 {
     std::scoped_lock lock_(m_sync);
     m_ignoreCallbackComplete = true;

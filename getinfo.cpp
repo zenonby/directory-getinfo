@@ -5,7 +5,7 @@
 #include "getinfo.h"
 #include "./ui_getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
-#include "dir_scanner/AllDirectoriesScanner.h"
+#include "dir_scanner/DirectoriesScanOrchestrator.h"
 #include "model/DirectoryStore.h"
 #include "utils.h"
 #include "settings.h"
@@ -56,7 +56,7 @@ GetInfo::~GetInfo()
     // Before destroying ui
     // so that a possibly executing callbackComplete lambda in scanAllDirectories()
     // which requires ui would finish before ui is destroyed.
-    AllDirectoriesScanner::instance()->ignoreCallbackComplete();
+    DirectoriesScanOrchestrator::instance()->ignoreCallbackComplete();
 
     delete ui;
     ui = nullptr;
@@ -83,7 +83,7 @@ GetInfo::treeDirectoriesSelectionChanged(
 
         std::vector<QString> dirs;
         dirs.push_back(m_unifiedSelectedPath);
-        AllDirectoriesScanner::instance()->scanDirectoriesSequentially(dirs, [self = this]()
+        DirectoriesScanOrchestrator::instance()->scanDirectoriesSequentially(dirs, [self = this]()
         {
 #if 0
                 bool res = QMetaObject::invokeMethod(
@@ -294,7 +294,7 @@ GetInfo::scanAllDirectories()
         topDirectories.emplace_back(childPath);
     }
 
-    AllDirectoriesScanner::instance()->scanDirectoriesSequentially(
+    DirectoriesScanOrchestrator::instance()->scanDirectoriesSequentially(
         topDirectories, [self = this]()
         {
             bool res = QMetaObject::invokeMethod(

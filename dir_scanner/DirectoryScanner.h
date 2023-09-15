@@ -10,8 +10,12 @@
 #include "IDirectoryScannerEventSink.h"
 #include "model/WorkStack.h"
 
+class DirectoriesScanOrchestrator;
+
 class DirectoryScanner
 {
+	friend class DirectoriesScanOrchestrator;
+
 public:
 	~DirectoryScanner();
 
@@ -24,6 +28,11 @@ public:
 
 	void subscribe(IDirectoryScannerEventSink* eventSink);
 	void unsubscribe(IDirectoryScannerEventSink* eventSink);
+
+protected:
+	//
+	// These methods are hid from client code so that DirectoriesScanOrchestrator would be used instead.
+	//
 
 	void setFocusedPath(const QString& dirPath);
 	std::future<DirectoryProcessingStatus> setFocusedPathAndGetFuture(const QString& dirPath);

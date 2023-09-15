@@ -1,6 +1,6 @@
 #include "getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
-#include "dir_scanner/AllDirectoriesScanner.h"
+#include "dir_scanner/DirectoriesScanOrchestrator.h"
 #include "model/DirectoryScanSwitch.h"
 #include "settings.h"
 
@@ -31,9 +31,9 @@ main(int argc, char *argv[])
             res = a.exec();
         }
 
-        // Must be executed before AllDirectoriesScanner::fini()
+        // Must be executed before DirectoriesScanOrchestrator::fini()
         DirectoryScanner::instance()->fini();
-        AllDirectoriesScanner::instance()->fini();
+        DirectoriesScanOrchestrator::instance()->fini();
         DirectoryScanSwitch::instance()->fini();
         Settings::instance()->fini();
     }

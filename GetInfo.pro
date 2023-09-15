@@ -23,7 +23,7 @@ SOURCES += \
     view_model/kfilesystemmodel.cpp \
     view_model/kmimesizesmodel.cpp \
     view_model/kmapper.cpp \
-    dir_scanner/AllDirectoriesScanner.cpp \
+    dir_scanner/DirectoriesScanOrchestrator.cpp \
     dir_scanner/DirectoryScanner.cpp
 
 HEADERS += \
@@ -41,7 +41,7 @@ HEADERS += \
     view_model/kfilesystemmodel.h \
     view_model/kmimesizesmodel.h \
     view_model/kmapper.h \
-    dir_scanner/AllDirectoriesScanner.h \
+    dir_scanner/DirectoriesScanOrchestrator.h \
     dir_scanner/DirectoryScanner.h \
     dir_scanner/IDirectoryScannerEventSink.h \
     dir_scanner/KDirectoryInfo.h \

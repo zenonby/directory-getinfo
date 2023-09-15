@@ -1,5 +1,5 @@
-#ifndef ALLDIRECTORIESSCANNER_H
-#define ALLDIRECTORIESSCANNER_H
+#ifndef DIRECTORIESSCANORCHESTRATOR_H
+#define DIRECTORIESSCANORCHESTRATOR_H
 
 #include <functional>
 #include <vector>
@@ -9,13 +9,14 @@
 #include "model/DirectoryProcessingStatus.h"
 
 // Singleton which manages lifetime of a worker thread which performs full scanning
-//	and it's iteration with UI initiated scans
-class AllDirectoriesScanner
+//	and it's iteration with UI initiated scans.
+// It must be used by client code to automatically cancel already running scans and schedule new ones.
+class DirectoriesScanOrchestrator
 {
 public:
-	~AllDirectoriesScanner();
+	~DirectoriesScanOrchestrator();
 
-	static AllDirectoriesScanner* instance();
+	static DirectoriesScanOrchestrator* instance();
 
 	// Call before exit to make sure the worker thread is complete
 	void fini();
@@ -31,11 +32,11 @@ public:
 	void ignoreCallbackComplete();
 
 private:
-	AllDirectoriesScanner();
-	AllDirectoriesScanner(const AllDirectoriesScanner&) = delete;
-	AllDirectoriesScanner& operator=(const AllDirectoriesScanner&) = delete;
-	AllDirectoriesScanner(AllDirectoriesScanner&&) = delete;
-	AllDirectoriesScanner& operator=(AllDirectoriesScanner&&) = delete;
+	DirectoriesScanOrchestrator();
+	DirectoriesScanOrchestrator(const DirectoriesScanOrchestrator&) = delete;
+	DirectoriesScanOrchestrator& operator=(const DirectoriesScanOrchestrator&) = delete;
+	DirectoriesScanOrchestrator(DirectoriesScanOrchestrator&&) = delete;
+	DirectoriesScanOrchestrator& operator=(DirectoriesScanOrchestrator&&) = delete;
 
 	std::mutex m_sync;
 	bool m_ignoreCallbackComplete;
@@ -55,4 +56,4 @@ private:
 	DirectoryProcessingStatus setAndGetActiveFuture(std::future<DirectoryProcessingStatus>&& fut);
 };
 
-#endif // ALLDIRECTORIESSCANNER_H
+#endif // DIRECTORIESSCANORCHESTRATOR_H
