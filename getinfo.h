@@ -8,10 +8,12 @@
 #include <QMainWindow>
 #include <QItemSelectionModel>
 
+#include "KDateTimeSeriesChartView.h"
 #include "ProgressDlg.h"
 #include "view_model/kfilesystemmodel.h"
 #include "view_model/kmimesizesmodel.h"
 #include "dir_scanner/IDirectoryScannerEventSink.h"
+#include "model/HistoryProvider.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GetInfo; }
@@ -36,6 +38,7 @@ public:
 private:
 
     Ui::GetInfo *ui;
+    KDateTimeSeriesChartView* m_dirSizeHistoryGraph;
 
     // Unified path of currently selected path
     QString m_unifiedSelectedPath;
@@ -50,6 +53,9 @@ private:
 
     // Restores 'Scan All' button state
     Q_INVOKABLE void restoreScanAllButton();
+
+    // Updates history graph with history data
+    Q_INVOKABLE void updateHistoryGraph(HistoryProvider::TDirectoryHistoryPtr pHistory);
 
     void readSettings();
     void writeSettings();
@@ -73,6 +79,9 @@ private slots:
 
     // Saves scan results to DB
     void startSavingSnapshot();
+
+    // Starts requesting history info for a selected directory and updating graph
+    void startUpdatingHistoryGraph();
 
     // Starts scanning all directories
     void scanAllDirectories();

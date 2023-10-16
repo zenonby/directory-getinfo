@@ -8,6 +8,8 @@
 #include <QString>
 #include <QDebug>
 
+#include "config.h"
+
 #include "DirectoryScanner.h"
 #include "KDirectoryInfo.h"
 #include "model/DirectoryScanSwitch.h"
@@ -41,6 +43,8 @@ DirectoryScanner::setRootPath(const QString& rootPath)
 {
     std::scoped_lock lock_(m_sync);
     m_rootPath = getUnifiedPathName(rootPath);
+
+    m_workStack.setRootPath(m_rootPath);
 }
 
 void
@@ -353,6 +357,8 @@ DirectoryScanner::stopWorker() noexcept
 void
 DirectoryScanner::worker()
 {
+    KDBG_CURRENT_THREAD_NAME(L"DirectoryScanner::worker");
+
     try
     {
         while (!isDestroying())
@@ -461,6 +467,8 @@ DirectoryScanner::worker()
 void
 DirectoryScanner::notifier()
 {
+    KDBG_CURRENT_THREAD_NAME(L"DirectoryScanner::notifier");
+
     try
     {
         while (!isDestroying())

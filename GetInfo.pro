@@ -1,6 +1,6 @@
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += core widgets charts
 
 CONFIG += c++20
 QMAKE_CXXFLAGS += -std=c++2a
@@ -16,10 +16,12 @@ SOURCES += \
     settings.cpp \
     ProgressDlg.cpp \
     FileSizeDivisor.cpp \
+    KDateTimeSeriesChartView.cpp \
     model/DirectoryStore.cpp \
     model/MimeDetails.cpp \
     model/WorkStack.cpp \
     model/DirectoryScanSwitch.cpp \
+    model/HistoryProvider.cpp \
     view_model/kfilesystemmodel.cpp \
     view_model/kmimesizesmodel.cpp \
     view_model/kmapper.cpp \
@@ -32,12 +34,14 @@ HEADERS += \
     settings.h \
     ProgressDlg.h \
     FileSizeDivisor.h \
+    KDateTimeSeriesChartView.h \
     model/DirectoryDetails.h \
     model/DirectoryProcessingStatus.h \
     model/DirectoryStore.h \
     model/MimeDetails.h \
     model/WorkStack.h \
     model/DirectoryScanSwitch.h \
+    model/HistoryProvider.h \
     view_model/kfilesystemmodel.h \
     view_model/kmimesizesmodel.h \
     view_model/kmapper.h \

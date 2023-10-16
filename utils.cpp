@@ -1,5 +1,7 @@
+#include <format>
 #include <QDebug>
 #include <QDir>
+#include <QTimeZone>
 #include "utils.h"
 
 QString
@@ -56,4 +58,29 @@ getImmediateParent(const QString unifiedPath)
 	assert(isUnifiedPath(parentPath));
 
 	return parentPath;
+}
+
+QDateTime
+convertToQDateTime(std::chrono::utc_clock::time_point dt)
+{
+	// Conversion from utc_clock::time_since_epoch to QDateTime via milliseconds 
+	//	is not precise, thus first cast to_sys.
+	auto tSys = std::chrono::utc_clock::to_sys(dt);
+	auto mSecsSinceEpoch = duration_cast<std::chrono::milliseconds>(tSys.time_since_epoch()).count();
+	QDateTime qDt = QDateTime::fromMSecsSinceEpoch(mSecsSinceEpoch, QTimeZone::utc());
+
+#ifndef NDEBUG
+	auto sDate = std::format("{0:%F}T{0:%T%z}", dt);
+	auto sQtDate = qDt.toString("yyyy.MM.dd hh:mm:ss.zzz");
+#endif
+
+	return qDt;
+}
+
+void
+dbgCurrentThreadName(const wchar_t* wszThreadName)
+{
+#ifdef K_USE_THREAD_NAMES
+	::SetThreadDescription(::GetCurrentThread(), wszThreadName);
+#endif
 }

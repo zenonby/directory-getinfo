@@ -1,5 +1,6 @@
 #include <QMessageBox>
 #include "ProgressDlg.h"
+#include "utils.h"
 
 ProgressDlg::ProgressDlg(QWidget* parent,
     const QString& windowTitle,
@@ -93,6 +94,8 @@ ProgressDlg::complete()
 void
 ProgressDlg::workerWrapper()
 {
+    KDBG_CURRENT_THREAD_NAME(L"ProgressDlg::workerWrapper");
+
     assert(m_progressPromise);
     assert(m_worker);
 

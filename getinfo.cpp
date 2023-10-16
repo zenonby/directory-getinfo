@@ -3,7 +3,7 @@
 #include <QMessageBox>
 
 #include "getinfo.h"
-#include "./ui_getinfo.h"
+#include "ui_getinfo.h"
 #include "dir_scanner/DirectoryScanner.h"
 #include "dir_scanner/DirectoriesScanOrchestrator.h"
 #include "model/DirectoryStore.h"
@@ -20,9 +20,22 @@ using namespace std::placeholders;
 
 GetInfo::GetInfo(QWidget* parent)
     : QMainWindow(parent),
-      ui(new Ui::GetInfo)
+      ui(new Ui::GetInfo),
+      m_dirSizeHistoryGraph(nullptr)
 {
     ui->setupUi(this);
+
+    m_dirSizeHistoryGraph = new KDateTimeSeriesChartView(
+        tr("Size history"),
+        tr("Date"),
+        tr("Size"));
+
+    ui->hSplitter->setStretchFactor(0, 3);
+    ui->hSplitter->setStretchFactor(1, 2);
+
+    ui->vSplitter->insertWidget(0, m_dirSizeHistoryGraph);
+    ui->vSplitter->setStretchFactor(0, 1);
+    ui->vSplitter->setStretchFactor(1, 4);
 
     QString rootPath = m_fsModel.rootPath();
     DirectoryScanner::instance()->setRootPath(rootPath);
@@ -57,6 +70,7 @@ GetInfo::~GetInfo()
     // so that a possibly executing callbackComplete lambda in scanAllDirectories()
     // which requires ui would finish before ui is destroyed.
     DirectoriesScanOrchestrator::instance()->ignoreCallbackComplete();
+    HistoryProvider::instance()->ignoreCallbackComplete();
 
     delete ui;
     ui = nullptr;
@@ -91,6 +105,23 @@ GetInfo::treeDirectoriesSelectionChanged(
                 assert(res);
 #endif
         });
+
+        startUpdatingHistoryGraph();
+    }
+}
+
+void
+GetInfo::startUpdatingHistoryGraph()
+{
+    if (!m_unifiedSelectedPath.isEmpty())
+    {
+        HistoryProvider::instance()->getDirectoryHistoryAsync(m_unifiedSelectedPath,
+            [self = this](auto pHistory) {
+                bool res = QMetaObject::invokeMethod(
+                    self, "updateHistoryGraph", Qt::QueuedConnection,
+                    Q_ARG(HistoryProvider::TDirectoryHistoryPtr, pHistory));
+                assert(res);
+            });
     }
 }
 
@@ -267,6 +298,8 @@ void
 GetInfo::onCompleteSavingSnapshot()
 {
     m_progressDlg.reset();
+
+    startUpdatingHistoryGraph();
 }
 
 void
@@ -310,4 +343,28 @@ GetInfo::restoreScanAllButton()
     ui->actionScanAll->setEnabled(true);
 
     ui->actionSaveSnapshot->setEnabled(true);
+}
+
+void
+GetInfo::updateHistoryGraph(HistoryProvider::TDirectoryHistoryPtr pHistory)
+{
+    assert(m_dirSizeHistoryGraph);
+
+    m_dirSizeHistoryGraph->beginAppendSeriesDateValues();
+    auto endAppendSeries = scope_guard([&](auto) {
+        m_dirSizeHistoryGraph->endAppendSeriesDateValues();
+    });
+
+    auto& history = *pHistory;
+    for (const auto& iter : history)
+    {
+        auto dtUtc = iter.first;
+        auto totalSize = iter.second;
+
+#ifndef NDEBUG
+        auto sDate = dtUtc.toString("dd.MM.yyyy hh:mm:ss.zzz");
+#endif
+
+        m_dirSizeHistoryGraph->appendSeriesDateValue(dtUtc, totalSize);
+    }
 }

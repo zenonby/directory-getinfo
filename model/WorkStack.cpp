@@ -29,6 +29,13 @@ WorkStack::checkedPopScanDirectory()
 }
 
 void
+WorkStack::setRootPath(const QString& rootPath)
+{
+    assert(isUnifiedPath(rootPath));
+    m_rootPath = rootPath;
+}
+
+void
 WorkStack::setFocusedPath(const QString& unifiedPath)
 {
     assert(isUnifiedPath(unifiedPath));
@@ -179,7 +186,7 @@ WorkStack::copyReadyScanDirectoryDataToParent(const WorkState& workState)
 
     // Update the data store
     const auto& parentDirPath = getImmediateParent(workDirPath);
-    if (!parentDirPath.isEmpty())
+    if (!parentDirPath.isEmpty() && !m_rootPath.startsWith(parentDirPath))
     {
         DirectoryDetails parentDirDetails;
         bool res = DirectoryStore::instance()->tryGetDirectory(

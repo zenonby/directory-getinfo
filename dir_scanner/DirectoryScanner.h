@@ -29,6 +29,8 @@ public:
 	void subscribe(IDirectoryScannerEventSink* eventSink);
 	void unsubscribe(IDirectoryScannerEventSink* eventSink);
 
+
+
 protected:
 	//
 	// These methods are hid from client code so that DirectoriesScanOrchestrator would be used instead.

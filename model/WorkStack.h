@@ -34,6 +34,8 @@ public:
 	const WorkState& top() const noexcept;
 	WorkState& top() noexcept;
 
+	void setRootPath(const QString& rootPath);
+
 	// unifiedPath - unified path
 	void setFocusedPath(const QString& unifiedPath = QString());
 
@@ -61,6 +63,7 @@ public:
 	void pauseTopDirectory();
 
 private:
+	QString m_rootPath;
 	std::stack<WorkState> m_scanDirectories;
 
 	// Focused (from UI) scan path

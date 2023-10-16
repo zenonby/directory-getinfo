@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <map>
+#include <chrono>
 #include <QString>
 
 #include "DirectoryDetails.h"
@@ -35,6 +36,14 @@ public:
 	/// Saves current data (m_directories) to database
 	/// </summary>
 	void saveCurrentData();
+
+	typedef std::map<
+		std::chrono::utc_clock::time_point,
+		DirectoryStats
+	> TDirectoryStatsHistory;
+
+	/// Retrieves all previously stored directory stats from the store
+	TDirectoryStatsHistory getDirectoryStatsHistory(const QString& unifiedPath) const;
 
 private:
 	DirectoryStore();

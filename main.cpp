@@ -2,7 +2,9 @@
 #include "dir_scanner/DirectoryScanner.h"
 #include "dir_scanner/DirectoriesScanOrchestrator.h"
 #include "model/DirectoryScanSwitch.h"
+#include "model/HistoryProvider.h"
 #include "settings.h"
+#include "utils.h"
 
 #include <exception>
 #include <QDebug>
@@ -11,6 +13,8 @@
 int
 main(int argc, char *argv[])
 {
+    KDBG_CURRENT_THREAD_NAME(L"main");
+
     int res = 1;
 
     try
@@ -22,6 +26,7 @@ main(int argc, char *argv[])
         qRegisterMetaType<std::exception_ptr>("std::exception_ptr");
         qRegisterMetaType<KDirectoryInfoPtr>("KDirectoryInfoPtr");
         qRegisterMetaType<KMimeSizesInfoPtr>("KMimeSizesInfoPtr");
+        qRegisterMetaType<HistoryProvider::TDirectoryHistoryPtr>("HistoryProvider::TDirectoryHistoryPtr");
 
         // Call all dtor-s
         {
@@ -34,6 +39,7 @@ main(int argc, char *argv[])
         // Must be executed before DirectoriesScanOrchestrator::fini()
         DirectoryScanner::instance()->fini();
         DirectoriesScanOrchestrator::instance()->fini();
+        HistoryProvider::instance()->fini();
         DirectoryScanSwitch::instance()->fini();
         Settings::instance()->fini();
     }

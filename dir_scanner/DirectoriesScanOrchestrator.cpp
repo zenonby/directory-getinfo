@@ -26,7 +26,8 @@ DirectoriesScanOrchestrator::fini()
     waitForActiveFutureToFinish();
 }
 
-void DirectoriesScanOrchestrator::waitForActiveFutureToFinish()
+void
+DirectoriesScanOrchestrator::waitForActiveFutureToFinish()
 {
     decltype(m_activeFuture) fut;
 
@@ -66,13 +67,6 @@ DirectoriesScanOrchestrator::scanDirectoriesSequentially(
     const std::vector<QString>& directories,
     std::function<void()> callbackComplete)
 {
-    // Check that there's no other sequential scan is running
-    bool hasActiveFuture = false;
-    {
-        std::scoped_lock lock_(m_sync);
-        hasActiveFuture = m_activeFuture.has_value();
-    }
-
     DirectoryScanner::instance()->resetFocusedPathWithLocking();
 
     waitForActiveFutureToFinish();
@@ -88,6 +82,8 @@ DirectoriesScanOrchestrator::scanDirectoriesSequentiallyWorker(
     const std::vector<QString> directories,
     std::function<void()> callbackComplete)
 {
+    KDBG_CURRENT_THREAD_NAME(L"DirectoriesScanOrchestrator::scanDirectoriesSequentiallyWorker");
+
     for (auto path : directories)
     {
         auto fut = DirectoryScanner::instance()->setFocusedPathAndGetFuture(path);
