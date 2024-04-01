@@ -62,6 +62,8 @@ set(PROJECT_SOURCES
         view_model/kmimesizesmodel.h
         view_model/kmapper.cpp
         view_model/kmapper.h
+        view_model/kdatetimeserieschartmodel.cpp
+        view_model/kdatetimeserieschartmodel.h
         getinfo.ui
         resources.qrc
 )

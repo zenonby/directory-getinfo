@@ -8,10 +8,11 @@
 #include <QMainWindow>
 #include <QItemSelectionModel>
 
-#include "KDateTimeSeriesChartView.h"
+#include "kdatetimeserieschartview.h"
 #include "ProgressDlg.h"
 #include "view_model/kfilesystemmodel.h"
 #include "view_model/kmimesizesmodel.h"
+#include "view_model/kdatetimeserieschartmodel.h"
 #include "dir_scanner/IDirectoryScannerEventSink.h"
 #include "model/HistoryProvider.h"
 
@@ -46,6 +47,13 @@ private:
     // Models for views
     KFileSystemModel m_fsModel;
     KMimeSizesModel m_msModel;
+    KDateTimeSeriesChartModel m_chartModel;
+
+    // This flag is used to avoid infinite recursion while cancelling selection in TreeView
+    bool m_deselectingTreeView;
+
+    // Indicates if full scann is in progress
+    bool m_scanningAllDirectories;
 
     Q_INVOKABLE void updateDirectoryInfo(KDirectoryInfoPtr pInfo);
     Q_INVOKABLE void updateMimeSizes(KMimeSizesInfoPtr pInfo);

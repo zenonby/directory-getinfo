@@ -1,5 +1,6 @@
 #include <QFont>
 #include <cmath>
+#include "defs.h"
 #include "kmimesizesmodel.h"
 
 void
@@ -90,9 +91,11 @@ KMimeSizesModel::data(const QModelIndex& index, int role) const
         case 1:
             return QString("%L1").arg(static_cast<unsigned long long>(row.fileCount));
         case 2:
-            return QString("%L1").arg(row.totalSize / divisorValue);
+            return QString("%L1").arg(round(
+                row.totalSize / static_cast<float>(divisorValue) * FILE_SIZE_ROUNDING_FACTOR) / FILE_SIZE_ROUNDING_FACTOR);
         case 3:
-            return QString("%L1").arg(round(row.avgSize / static_cast<float>(divisorValue) * 1000) / 1000.f);
+            return QString("%L1").arg(round(
+                row.avgSize / static_cast<float>(divisorValue) * FILE_SIZE_ROUNDING_FACTOR) / FILE_SIZE_ROUNDING_FACTOR);
         default:
             assert(!"Unexpected");
             return QVariant();

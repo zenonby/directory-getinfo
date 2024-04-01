@@ -21,11 +21,14 @@ using namespace std::placeholders;
 GetInfo::GetInfo(QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::GetInfo),
-      m_dirSizeHistoryGraph(nullptr)
+      m_dirSizeHistoryGraph(nullptr),
+      m_deselectingTreeView(false),
+      m_scanningAllDirectories(false)
 {
     ui->setupUi(this);
 
     m_dirSizeHistoryGraph = new KDateTimeSeriesChartView(
+        &m_chartModel,
         tr("Size history"),
         tr("Date"),
         tr("Size"));
@@ -59,6 +62,8 @@ GetInfo::GetInfo(QWidget* parent)
     connect(ui->actionSaveSnapshot, SIGNAL(triggered()), this, SLOT(startSavingSnapshot()));
     connect(ui->actionScanAll, SIGNAL(triggered()), this, SLOT(scanAllDirectories()));
 
+//    connect(m_dirSizeHistoryGraph, SIGNAL(destroyed()), &KDateTimeSeriesChartView::onDestroyed);
+
     DirectoryScanner::instance()->subscribe(this);
 }
 
@@ -80,6 +85,31 @@ void
 GetInfo::treeDirectoriesSelectionChanged(
     const QItemSelection& selected, const QItemSelection& deselected)
 {
+    //
+    // Avoid infinite recursion while deselecting an item
+    //
+
+    if (m_deselectingTreeView)
+        return;
+
+    m_deselectingTreeView = true;
+    auto endAppendSeries = scope_guard([&](auto) {
+        m_deselectingTreeView = false;
+    });
+
+    // Check if full scan is in progress in order to prevent accidental abort of scanning
+    if (m_scanningAllDirectories &&
+        QMessageBox::No == QMessageBox::question(
+            this, tr("Question"), tr("Full scan is in progress. Would you like to cancel full scan?"),
+            QMessageBox::Yes | QMessageBox::No))
+    {
+        // Cancel selection
+        auto selectionModel = ui->treeDirectories->selectionModel();
+        selectionModel->select(selected, QItemSelectionModel::Deselect);
+        selectionModel->select(deselected, QItemSelectionModel::Select);
+        return;
+    }
+
     // Reset MIME type total sizes
     m_msModel.setMimeSizes(KMimeSizesInfo::KMimeSizesList());
 
@@ -136,6 +166,7 @@ GetInfo::switchToBytes()
 
     m_fsModel.setFileSizeDivisor(FileSizeDivisor::Bytes);
     m_msModel.setFileSizeDivisor(FileSizeDivisor::Bytes);
+    m_chartModel.setFileSizeDivisor(FileSizeDivisor::Bytes);
 }
 
 void
@@ -149,6 +180,7 @@ GetInfo::switchToKBytes()
 
     m_fsModel.setFileSizeDivisor(FileSizeDivisor::KBytes);
     m_msModel.setFileSizeDivisor(FileSizeDivisor::KBytes);
+    m_chartModel.setFileSizeDivisor(FileSizeDivisor::KBytes);
 }
 
 void
@@ -162,6 +194,7 @@ GetInfo::switchToMBytes()
 
     m_fsModel.setFileSizeDivisor(FileSizeDivisor::MBytes);
     m_msModel.setFileSizeDivisor(FileSizeDivisor::MBytes);
+    m_chartModel.setFileSizeDivisor(FileSizeDivisor::MBytes);
 }
 
 void
@@ -316,6 +349,8 @@ GetInfo::scanAllDirectories()
 
     ui->actionSaveSnapshot->setEnabled(false);
 
+    m_scanningAllDirectories = true;
+
     // Get root directories
     std::vector<QString> topDirectories;
     auto rootIndex = ui->treeDirectories->rootIndex();
@@ -339,6 +374,8 @@ GetInfo::scanAllDirectories()
 void
 GetInfo::restoreScanAllButton()
 {
+    m_scanningAllDirectories = false;
+
     ui->actionScanAll->setChecked(false);
     ui->actionScanAll->setEnabled(true);
 
@@ -350,9 +387,9 @@ GetInfo::updateHistoryGraph(HistoryProvider::TDirectoryHistoryPtr pHistory)
 {
     assert(m_dirSizeHistoryGraph);
 
-    m_dirSizeHistoryGraph->beginAppendSeriesDateValues();
+    m_chartModel.beginAppendSeriesDateValues();
     auto endAppendSeries = scope_guard([&](auto) {
-        m_dirSizeHistoryGraph->endAppendSeriesDateValues();
+        m_chartModel.endAppendSeriesDateValues();
     });
 
     auto& history = *pHistory;
@@ -365,6 +402,6 @@ GetInfo::updateHistoryGraph(HistoryProvider::TDirectoryHistoryPtr pHistory)
         auto sDate = dtUtc.toString("dd.MM.yyyy hh:mm:ss.zzz");
 #endif
 
-        m_dirSizeHistoryGraph->appendSeriesDateValue(dtUtc, totalSize);
+        m_chartModel.appendSeriesDateValue(dtUtc, totalSize);
     }
 }

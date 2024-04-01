@@ -1,4 +1,5 @@
 #include <QDebug>
+#include "defs.h"
 #include "kfilesystemmodel.h"
 #include "model/DirectoryScanSwitch.h"
 #include "utils.h"
@@ -96,7 +97,8 @@ KFileSystemModel::data(const QModelIndex& index, int role) const
 				QString();
 		case 3:
 			return nullptr != dirData && dirData->totalSize.has_value() ?
-				QString("%L1").arg(static_cast<qulonglong>(dirData->totalSize.value() / divisorValue)) :
+				QString("%L1").arg(round(
+					dirData->totalSize.value() / static_cast<float>(divisorValue) * FILE_SIZE_ROUNDING_FACTOR) / FILE_SIZE_ROUNDING_FACTOR) :
 				QString();
 		case 4:
 			return translateDirectoryProcessingStatus(

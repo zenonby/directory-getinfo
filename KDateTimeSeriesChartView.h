@@ -6,28 +6,24 @@
 #include <QDateTimeAxis>
 #include <QValueAxis>
 #include <QString>
+#include "view_model/kdatetimeserieschartmodel.h"
 
 /// <summary>
 /// Time-series chart
 /// </summary>
 class KDateTimeSeriesChartView : public QtCharts::QChartView
 {
+    friend class KDateTimeSeriesChartModel;
+
 public:
     KDateTimeSeriesChartView(
+        KDateTimeSeriesChartModel* viewModel,
         const QString& chartTitle,
         const QString& axisXTitle,
         const QString& axisYTitle);
 
-    /// Clears previous series
-    void beginAppendSeriesDateValues();
-
-    /// Appends date-time value
-    void appendSeriesDateValue(const QDateTime& dateTime, qreal y);
-
-    /// Recalculates chart ranges so that the all data would be shown properly
-    void endAppendSeriesDateValues();
-
 private:
+    KDateTimeSeriesChartModel* m_viewModel;
     QString m_chartTitle;
     QString m_axisXTitle;
     QString m_axisYTitle;
@@ -38,6 +34,10 @@ private:
     QtCharts::QValueAxis* m_axisY;
 
     void recalcRange();
+    QString getAxisYTitle() const;
+
+public slots:
+    void onModelUpdated();
 };
 
 #endif // KDateTimeSeriesChartView_H
