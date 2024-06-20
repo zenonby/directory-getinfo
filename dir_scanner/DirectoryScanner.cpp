@@ -307,12 +307,20 @@ DirectoryScanner::popScanDirectoryAndSetPending()
     const WorkState& workState = m_workStack.top();
     auto workDirPath = workState.fullPath;
 
-    m_workStack.popScanDirectory(DirectoryProcessingStatus::Pending);
-
     // Notify event subscribers
     DirectoryDetails workDirDetails;
     bool res = DirectoryStore::instance()->tryGetDirectory(workDirPath, false, workDirDetails);
     assert(res);
+
+    if (DirectoryProcessingStatus::Ready == workDirDetails.status ||
+        DirectoryProcessingStatus::Error == workDirDetails.status)
+    {
+        m_workStack.popScanDirectory(workDirDetails.status);
+    }
+    else
+    {
+        m_workStack.popScanDirectory(DirectoryProcessingStatus::Pending);
+    }
 
     workDirDetails.status = DirectoryProcessingStatus::Pending;
     prepareDtoAndNotifyEventSinks(workDirPath, workDirDetails, false);
