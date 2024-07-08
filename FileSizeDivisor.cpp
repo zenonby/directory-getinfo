@@ -9,9 +9,9 @@ FileSizeDivisorUtils::getDivisorSuffix(FileSizeDivisor divisor)
     case FileSizeDivisor::Bytes:
         return QObject::tr("B");
     case FileSizeDivisor::KBytes:
-        return QObject::tr("KB");
+        return QObject::tr("KiB");
     case FileSizeDivisor::MBytes:
-        return QObject::tr("MB");
+        return QObject::tr("MiB");
     default:
         assert(!"Unexpected FileSizeDivisor value");
     }
